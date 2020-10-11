@@ -1,0 +1,1 @@
+web: gunicorn app:app --log-level debug --workers=1 --timeout=90 --preload
