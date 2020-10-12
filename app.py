@@ -120,3 +120,5 @@ def main_bot(message):
 bot.polling()  # start infinity circle
 shred.start()  # start timer
 # app.run(debug=False, host='0.0.0.0')  # Flask host bind (fix heroku problem)
+
+# web: gunicorn app:bot.py --log-level debug --workers=1 --timeout=90 --preload
