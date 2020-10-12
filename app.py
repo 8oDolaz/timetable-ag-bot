@@ -120,3 +120,5 @@ def main_bot(message):
 bot.remove_webhook()
 bot.polling()  # start infinity circle
 shred.start()  # start timer
+
+# aplfdsf
