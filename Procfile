@@ -1,1 +1,1 @@
-worker: app.py
+web: gunicorn app:app.py --log-level debug --workers=1 --timeout=90 --preload

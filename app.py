@@ -3,10 +3,10 @@ import json
 from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import requests
-# from flask import Flask
+from flask import Flask
 from bs4 import BeautifulSoup  # import everything we need
 
-# app = Flask(__name__)
+app = Flask(__name__)
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
@@ -119,6 +119,4 @@ def main_bot(message):
 
 bot.polling()  # start infinity circle
 shred.start()  # start timer
-# app.run(debug=False, host='0.0.0.0')  # Flask host bind (fix heroku problem)
-
-# web: gunicorn app:app.py --log-level debug --workers=1 --timeout=90 --preload
+app.run(debug=False, host='0.0.0.0')  # Flask host bind (fix heroku problem)
