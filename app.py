@@ -120,4 +120,4 @@ def main_bot(message):
 
 bot.polling()  # start infinity circle
 shred.start()  # start timer
-app.run(debug=False, host='127.0.0.1', port=environ.get('PORT', 5000))  # Flask host bind (fix heroku problem)
+app.run(debug=False, host='127.0.0.1', port=environ.get('PORT', 33500))  # Flask host bind (fix heroku problem)
