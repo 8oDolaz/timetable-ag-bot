@@ -4,6 +4,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import requests
 from flask import Flask
+from os import environ
 from bs4 import BeautifulSoup  # import everything we need
 
 app = Flask(__name__)
@@ -119,4 +120,4 @@ def main_bot(message):
 
 bot.polling()  # start infinity circle
 shred.start()  # start timer
-app.run(debug=False, host='0.0.0.0')  # Flask host bind (fix heroku problem)
+app.run(debug=False, host='127.0.0.1', port=environ.get('PORT', 5000))  # Flask host bind (fix heroku problem)
