@@ -52,8 +52,6 @@ async def parse_timetable():
     print(1)
 
 
-sched.start()
-
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
 button1 = telebot.types.KeyboardButton('Сегодня')
 button2 = telebot.types.KeyboardButton('Завтра')
@@ -121,3 +119,4 @@ async def main_bot(message):
 
 
 bot.polling()
+sched.start()
