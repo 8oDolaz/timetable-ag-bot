@@ -46,8 +46,5 @@ def parse_timetable():
         file.write(json.dumps(all_data))
         file.close()
 
-    print(1)
-    print(open('data_base.json', 'r').read())
-
 
 sched.start()
