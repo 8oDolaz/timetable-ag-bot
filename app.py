@@ -7,10 +7,12 @@ import asyncio
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
-sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', minutes=1)
+# sched = BlockingScheduler()
+
+
+# @sched.scheduled_job('interval', minutes=1)
 async def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
@@ -73,7 +75,7 @@ async def start(message):
 
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
-async def main_bot(message):
+def main_bot(message):
     if message.text.lower() == 'сегодня':  # to see today's timetable
 
         with open('data_base.json', 'r') as file:  # get everything we need from db
@@ -81,7 +83,7 @@ async def main_bot(message):
             file.close()
             data = data[0]
 
-        answer = prepare_answer(data)
+        answer = asyncio.run(prepare_answer(data))
 
         bot.send_message(message.chat.id, answer, reply_markup=keyboard1)  # send a message with timetable
 
@@ -92,7 +94,7 @@ async def main_bot(message):
             file.close()
             data = data[1]
 
-        answer = prepare_answer(data)
+        answer = asyncio.run(prepare_answer(data))
 
         bot.send_message(message.chat.id, answer, reply_markup=keyboard1)  # send a message with timetable
 
@@ -118,5 +120,6 @@ async def main_bot(message):
         bot.send_message(message.chat.id, 'Выберете одну из опций', reply_markup=keyboard1)
 
 
-bot.polling()
-sched.start()
+bot.polling(none_stop=True)
+
+# sched.start()
