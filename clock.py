@@ -7,7 +7,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 
-@sched.schedular_job('interval', minutes=1)
+@sched.scheduled_job('interval', minutes=1)
 def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
