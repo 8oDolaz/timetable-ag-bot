@@ -1,9 +1,5 @@
 import telebot
 import json
-import datetime
-import requests
-from bs4 import BeautifulSoup
-from apscheduler.schedulers.blocking import BlockingScheduler
 
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
 

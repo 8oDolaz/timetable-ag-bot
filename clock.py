@@ -7,7 +7,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', minutes=1)
+@sched.scheduled_job('interval', minutes=30)
 def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
@@ -45,8 +45,6 @@ def parse_timetable():
     with open('data_base.json', 'a') as file:  # add the array to a database
         file.write(json.dumps(all_data))
         file.close()
-
-    print(1)
 
 
 sched.start()
