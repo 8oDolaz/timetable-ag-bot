@@ -1,1 +1,1 @@
-worker: python app.py $PORT
+clock: python app.py
