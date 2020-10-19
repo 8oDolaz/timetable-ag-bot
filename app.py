@@ -3,6 +3,7 @@ import json
 import datetime
 import requests
 from bs4 import BeautifulSoup
+import asyncio
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
@@ -51,7 +52,7 @@ def parse_timetable():
     print(1)
 
 
-sched.start()
+asyncio.run(sched.start())
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
 button1 = telebot.types.KeyboardButton('Сегодня')
@@ -104,19 +105,19 @@ def main_bot(message):
             data = data[1:]
             file.close()
 
-        s = ''
+        answer = ''
         for item in data:  # add all timetable to a string
-            s += '\n' + '\n'
+            answer += '\n' + '\n'
             for v in item[0].keys():
-                s += v + '\n'
+                answer += v + '\n'
                 for i in range(len(item[0].get(v)[0])):
-                    s += item[0].get(v)[0][i] + ' ' + item[0].get(v)[1][i] + '\n'
+                    answer += item[0].get(v)[0][i] + ' ' + item[0].get(v)[1][i] + '\n'
 
-        bot.send_message(message.chat.id, s, reply_markup=keyboard1)  # send a message
+        bot.send_message(message.chat.id, answer, reply_markup=keyboard1)  # send a message
 
     else:
 
-        bot.send_message(message.chat.id, 'choose one of the options', reply_markup=keyboard1)
+        bot.send_message(message.chat.id, 'Выберете одну из опций', reply_markup=keyboard1)
 
 
-bot.polling()  # start infinity circle
+asyncio.run(bot.polling())  # start infinity circle
