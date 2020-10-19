@@ -1,13 +1,9 @@
 import telebot
 import json
-from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import requests
-from flask import Flask
-from os import environ
-from bs4 import BeautifulSoup  # import everything we need
+from bs4 import BeautifulSoup
 
-app = Flask(__name__)
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
@@ -16,10 +12,7 @@ button2 = telebot.types.KeyboardButton('Завтра')
 button3 = telebot.types.KeyboardButton('На неделю')
 keyboard1.row(button1, button2, button3)  # add it all to one row
 
-shred = BlockingScheduler()  # for timer
 
-
-@shred.scheduled_job('interval', minutes=1)  # interval in parsing
 def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
@@ -119,5 +112,3 @@ def main_bot(message):
 
 
 bot.polling()  # start infinity circle
-shred.start()  # start timer
-app.run(debug=False, host='127.0.0.1', port=environ.get('PORT', 33500))  # Flask host bind (fix heroku problem)

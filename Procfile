@@ -1,1 +1,1 @@
-web: gunicorn app:app --log-level debug --timeout=90 --preload
+worker: python app.py $PORT
