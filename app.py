@@ -52,9 +52,7 @@ async def parse_timetable():
     print(1)
 
 
-# asyncio.run(
-    sched.start()
-# )
+sched.start()
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
 button1 = telebot.types.KeyboardButton('Сегодня')
@@ -122,6 +120,4 @@ async def main_bot(message):
         bot.send_message(message.chat.id, 'Выберете одну из опций', reply_markup=keyboard1)
 
 
-# asyncio.run(
-    bot.polling()
-# )  # start infinity circle
+bot.polling()
