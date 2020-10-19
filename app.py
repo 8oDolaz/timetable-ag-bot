@@ -11,7 +11,7 @@ sched = BlockingScheduler()
 
 
 @sched.scheduled_job('interval', minutes=1)
-def parse_timetable():
+async def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
 
@@ -52,7 +52,9 @@ def parse_timetable():
     print(1)
 
 
-asyncio.run(sched.start())
+# asyncio.run(
+    sched.start()
+# )
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
 button1 = telebot.types.KeyboardButton('Сегодня')
@@ -61,7 +63,7 @@ button3 = telebot.types.KeyboardButton('На неделю')
 keyboard1.row(button1, button2, button3)  # add it all to one row
 
 
-def prepare_answer(data, s=''):
+async def prepare_answer(data, s=''):
     for item in data[0].keys():  # get all information that we need
         s += item + '\n' + '\n'  # do nice view
         for i in range(len(data[0].get(item)[0])):  # print all day info
@@ -70,12 +72,12 @@ def prepare_answer(data, s=''):
 
 
 @bot.message_handler(func=lambda message: True, commands=['start'])  # just to start use the bot
-def start(message):
+async def start(message):
     bot.send_message(message.chat.id, 'Добрый день!', reply_markup=keyboard1)
 
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
-def main_bot(message):
+async def main_bot(message):
     if message.text.lower() == 'сегодня':  # to see today's timetable
 
         with open('data_base.json', 'r') as file:  # get everything we need from db
@@ -120,4 +122,6 @@ def main_bot(message):
         bot.send_message(message.chat.id, 'Выберете одну из опций', reply_markup=keyboard1)
 
 
-asyncio.run(bot.polling())  # start infinity circle
+# asyncio.run(
+    bot.polling()
+# )  # start infinity circle
