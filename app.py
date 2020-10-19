@@ -3,8 +3,8 @@ import json
 import datetime
 import requests
 from bs4 import BeautifulSoup
-import asyncio
-from apscheduler.schedulers.blocking import BlockingScheduler
+# import asyncio
+# from apscheduler.schedulers.blocking import BlockingScheduler
 
 bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
 
@@ -13,7 +13,7 @@ bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot w
 
 
 # @sched.scheduled_job('interval', minutes=1)
-async def parse_timetable():
+def parse_timetable():
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')
 
@@ -61,7 +61,7 @@ button3 = telebot.types.KeyboardButton('На неделю')
 keyboard1.row(button1, button2, button3)  # add it all to one row
 
 
-async def prepare_answer(data, s=''):
+def prepare_answer(data, s=''):
     for item in data[0].keys():  # get all information that we need
         s += item + '\n' + '\n'  # do nice view
         for i in range(len(data[0].get(item)[0])):  # print all day info
@@ -70,7 +70,7 @@ async def prepare_answer(data, s=''):
 
 
 @bot.message_handler(func=lambda message: True, commands=['start'])  # just to start use the bot
-async def start(message):
+def start(message):
     bot.send_message(message.chat.id, 'Добрый день!', reply_markup=keyboard1)
 
 
@@ -83,7 +83,7 @@ def main_bot(message):
             file.close()
             data = data[0]
 
-        answer = asyncio.run(prepare_answer(data))
+        answer = prepare_answer(data)
 
         bot.send_message(message.chat.id, answer, reply_markup=keyboard1)  # send a message with timetable
 
@@ -94,7 +94,7 @@ def main_bot(message):
             file.close()
             data = data[1]
 
-        answer = asyncio.run(prepare_answer(data))
+        answer = prepare_answer(data)
 
         bot.send_message(message.chat.id, answer, reply_markup=keyboard1)  # send a message with timetable
 
