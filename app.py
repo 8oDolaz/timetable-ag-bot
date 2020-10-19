@@ -55,8 +55,6 @@ def parse_timetable():
         file.write(json.dumps(all_data))
         file.close()
 
-    print(1)
-
 
 def prepare_answer(data, s=''):
     for item in data[0].keys():  # get all information that we need
@@ -119,4 +117,3 @@ def main_bot(message):
 
 bot.polling()  # start infinity circle
 sched.start()
-
