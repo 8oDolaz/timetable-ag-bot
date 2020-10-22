@@ -43,3 +43,6 @@ def parse_timetable():
         file.close()
 
     print(1)
+
+
+parse_timetable()
