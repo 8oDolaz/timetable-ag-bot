@@ -42,7 +42,5 @@ def parse_timetable():
         file.write(json.dumps(all_data))
         file.close()
 
-    print(1)
-
 
 parse_timetable()
