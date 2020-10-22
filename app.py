@@ -48,7 +48,6 @@ def parse_timetable():
             file.close()
 
         print(1)
-print(parse_timetable())
 
 
 def main():
