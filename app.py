@@ -4,7 +4,7 @@ import psycopg2 as ps2
 
 def main():
 
-    def get_time_title(day):
+    def get_time_title(day, cursor):
         cursor.execute('SELECT * FROM LESSONS_TIME WHERE DAY_NAME=%s', (day,))
         time = [item[0] for item in cursor.fetchall()]  # item[0] because second field is day and we don't need it
 
@@ -20,41 +20,6 @@ def main():
             # I don't know where is the problem but I need to delete spaces here
             s += time[item].replace(' ', '') + ' ' + title[item] + '\n'
         return s
-
-    connection = ps2.connect(
-        database='dfsp85rbt6tna2',
-        host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-        user='rmpqgvxcfahbdg',
-        password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-        port='5432',
-    )
-
-    cursor = connection.cursor()
-
-    cursor.execute('SELECT * FROM DAY')
-    day = cursor.fetchall()[0][0]
-    time, title = get_time_title(day)
-
-    answer_today = prepare_answer(day, time, title)
-
-    cursor.execute('SELECT * FROM DAY')
-    day = cursor.fetchall()[1][0]
-    time, title = get_time_title(day)
-
-    answer_tomorrow = prepare_answer(day, time, title)
-
-    answer_week = ''
-
-    cursor.execute('SELECT * FROM DAY')
-    days = cursor.fetchall()
-    for day in days:
-        # we need to take first one to prevent error (there are only one object)
-        time, title = get_time_title(day[0])
-        answer_week += prepare_answer(day[0], time, title) + '\n'
-
-    connection.commit()
-    cursor.close()
-    connection.close()
 
     bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
 
@@ -72,13 +37,72 @@ def main():
     def main_bot(message):
         if message.text.lower() == 'сегодня':  # to see today's timetable
 
+            connection = ps2.connect(
+                database='dfsp85rbt6tna2',
+                host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
+                user='rmpqgvxcfahbdg',
+                password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
+                port='5432',
+            )
+
+            cursor = connection.cursor()
+
+            cursor.execute('SELECT * FROM DAY')
+            day = cursor.fetchall()[0][0]
+            time, title = get_time_title(day, cursor)
+
+            answer_today = prepare_answer(day, time, title)
+
+            connection.commit()
+            cursor.close()
+            connection.close()
+
             bot.send_message(message.chat.id, answer_today, reply_markup=keyboard1)  # send a message with timetable
 
         elif message.text.lower() == 'завтра':  # to see tomorrow's timetable
 
+            connection = ps2.connect(
+                database='dfsp85rbt6tna2',
+                host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
+                user='rmpqgvxcfahbdg',
+                password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
+                port='5432',
+            )
+
+            cursor = connection.cursor()
+
+            cursor.execute('SELECT * FROM DAY')
+            day = cursor.fetchall()[1][0]
+            time, title = get_time_title(day, cursor)
+
+            answer_tomorrow = prepare_answer(day, time, title)
+
             bot.send_message(message.chat.id, answer_tomorrow, reply_markup=keyboard1)  # send a message with timetable
 
         elif message.text.lower() == 'на неделю':  # to see week's timetable
+
+            connection = ps2.connect(
+                database='dfsp85rbt6tna2',
+                host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
+                user='rmpqgvxcfahbdg',
+                password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
+                port='5432',
+            )
+
+            cursor = connection.cursor()
+
+            answer_week = ''
+
+            cursor.execute('SELECT * FROM DAY')
+            days = cursor.fetchall()
+            for day in days:
+                # we need to take first one to prevent error (there are only one object)
+                time, title = get_time_title(day[0], cursor)
+                answer_week += prepare_answer(day[0], time, title) + '\n'
+
+            connection.commit()
+            cursor.close()
+            connection.close()
 
             bot.send_message(message.chat.id, answer_week, reply_markup=keyboard1)  # send a message
 
