@@ -1,6 +1,7 @@
 import telebot
 import psycopg2 as ps2
 import json
+import config
 
 
 def main():
@@ -51,13 +52,9 @@ def main():
     salute = "Привет! Для начала выбери свой класс:\nПожалуйста, введи в таком формате: '10И1' ('10' - класс, " \
              "'И' - твое направление, '1' - твоя группа) "
 
-    bot = telebot.TeleBot('1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M')  # bot with our token
+    bot = telebot.TeleBot(config.token)  # bot with our token
 
-    keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
-    button1 = telebot.types.KeyboardButton('Сегодня')
-    button2 = telebot.types.KeyboardButton('Завтра')
-    button3 = telebot.types.KeyboardButton('На неделю')
-    keyboard1.row(button1, button2, button3)  # add it all to one row
+    keyboard = config.keyboard1
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
     def start(message):
@@ -67,11 +64,11 @@ def main():
         if len(cursor.fetchall()) == 0:  # if user already exist
             bot.send_message(message.chat.id,
                              salute,
-                             reply_markup=keyboard1)
+                             reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id,
                              'Мы уже занем ваш класс (чтобы сменить его введите /reset)',
-                             reply_markup=keyboard1)
+                             reply_markup=keyboard)
 
     @bot.message_handler(func=lambda message: True, commands=['reset'])
     def reset(message):
@@ -102,7 +99,7 @@ def main():
 
                 bot.send_message(message.chat.id,
                                  answer_today,
-                                 reply_markup=keyboard1)  # send a message with timetable
+                                 reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'завтра':
 
                 connection, cursor = connect_main()
@@ -117,7 +114,7 @@ def main():
 
                 bot.send_message(message.chat.id,
                                  answer_tomorrow,
-                                 reply_markup=keyboard1)  # send a message with timetable
+                                 reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'на неделю':
 
                 connection, cursor = connect_main()
@@ -135,11 +132,11 @@ def main():
 
                 bot.send_message(message.chat.id,
                                  answer_week,
-                                 reply_markup=keyboard1)  # send a message
+                                 reply_markup=keyboard)  # send a message
             else:
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
-                                 reply_markup=keyboard1)
+                                 reply_markup=keyboard)
         else:
             with open('classes_info.json', 'r') as file:
                 stream_info = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
@@ -151,7 +148,7 @@ def main():
 
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
-                                 'Вы выбрали класс (чтобы сменить, введите /reset).', reply_markup=keyboard1)
+                                 'Вы выбрали класс (чтобы сменить, введите /reset).', reply_markup=keyboard)
             else:  # if there are no such stream
                 bot.send_message(message.chat.id,
                                  'Похоже, что вы неправильно указали название класса, попробуйте еще раз (вот '
