@@ -1,5 +1,6 @@
 import telebot
 import psycopg2 as ps2
+from enum import Enum
 
 
 def main():
