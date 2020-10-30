@@ -25,12 +25,12 @@ def parse_timetable():
         # replacing spaces after text
         date = date[::-1].replace(' ', '', 16)[::-1]  # today's date
 
-        for i in item.find_all('span', {'class': 'moreinfo', 'title': 'Время'}):
-            time = i.text.replace(' ', '').replace('\n', '').replace('\r', '')
+        for title_iter in item.find_all('span', {'class': 'moreinfo', 'title': 'Время'}):
+            time = title_iter.text.replace(' ', '').replace('\n', '').replace('\r', '')
             time_m.append(time)  # find and add all lessons timing
 
-        for i in item.find_all('span', {'class': 'moreinfo', 'title': 'Предмет'}):
-            title = i.text.replace(' ', '', 15).replace('\n', '').replace('\r', '')
+        for title_iter in item.find_all('span', {'class': 'moreinfo', 'title': 'Предмет'}):
+            title = title_iter.text.replace(' ', '', 15).replace('\n', '').replace('\r', '')
             title = title[:(title.find(','))]
             title_m.append(title)  # find and add all lessons title
 

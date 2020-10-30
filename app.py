@@ -1,8 +1,30 @@
 import telebot
 import psycopg2 as ps2
+import json
 
 
 def main():
+
+    def connect_main():
+        connection = ps2.connect(
+            database='dfsp85rbt6tna2',
+            host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
+            user='rmpqgvxcfahbdg',
+            password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
+            port=5432, )
+        cursor = connection.cursor()
+        return connection, cursor
+
+    def connect_test():
+        connection = ps2.connect(
+            database='d9rkqtvh45pj8c',
+            host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
+            port=5432,
+            user='zwlligehjlxrxw',
+            password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
+        )
+        cursor = connection.cursor()
+        return connection, cursor
 
     def disconnect(connect, cursor):
         connect.commit()
@@ -39,17 +61,10 @@ def main():
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
     def start(message):
-        connection = ps2.connect(
-            database='d9rkqtvh45pj8c',
-            host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
-            port=5432,
-            user='zwlligehjlxrxw',
-            password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
-        )
-        cursor = connection.cursor()
+        connection, cursor = connect_test()
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
-        if len(cursor.fetchall()) == 0:
+        if len(cursor.fetchall()) == 0:  # if user already exist
             bot.send_message(message.chat.id,
                              salute,
                              reply_markup=keyboard1)
@@ -60,45 +75,22 @@ def main():
 
     @bot.message_handler(func=lambda message: True, commands=['reset'])
     def reset(message):
-        connection = ps2.connect(
-            database='d9rkqtvh45pj8c',
-            host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
-            port=5432,
-            user='zwlligehjlxrxw',
-            password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
-        )
-        cursor = connection.cursor()
+        connection, cursor = connect_test()
 
-        cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''', (message.chat.id,))
-
+        cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''', (message.chat.id,))  # delete this user from db
         disconnect(connection, cursor)
-
-        bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь введите его снова.')
+        bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
 
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
     def main_bot(message):
-        connection = ps2.connect(
-            database='d9rkqtvh45pj8c',
-            host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
-            port=5432,
-            user='zwlligehjlxrxw',
-            password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
-        )
-        cursor = connection.cursor()
+        connection, cursor = connect_test()
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
 
-        if len(cursor.fetchall()) != 0:
+        if len(cursor.fetchall()) != 0:  # if no such user in table
             if message.text.lower() == 'сегодня':
 
-                connection = ps2.connect(
-                    database='dfsp85rbt6tna2',
-                    host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-                    user='rmpqgvxcfahbdg',
-                    password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-                    port=5432,)
-
-                cursor = connection.cursor()
+                connection, cursor = connect_main()
 
                 cursor.execute('SELECT * FROM DAY;')
                 day = cursor.fetchall()[0][0]
@@ -113,14 +105,7 @@ def main():
                                  reply_markup=keyboard1)  # send a message with timetable
             elif message.text.lower() == 'завтра':
 
-                connection = ps2.connect(
-                    database='dfsp85rbt6tna2',
-                    host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-                    user='rmpqgvxcfahbdg',
-                    password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-                    port='5432',)
-
-                cursor = connection.cursor()
+                connection, cursor = connect_main()
 
                 cursor.execute('SELECT * FROM DAY;')
                 day = cursor.fetchall()[1][0]
@@ -135,14 +120,7 @@ def main():
                                  reply_markup=keyboard1)  # send a message with timetable
             elif message.text.lower() == 'на неделю':
 
-                connection = ps2.connect(
-                    database='dfsp85rbt6tna2',
-                    host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-                    user='rmpqgvxcfahbdg',
-                    password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-                    port='5432',)
-
-                cursor = connection.cursor()
+                connection, cursor = connect_main()
 
                 answer_week = ''
 
@@ -163,20 +141,21 @@ def main():
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard1)
         else:
-            if message.text[0] in '189' and message.text[len(message.text) - 1] in '12':
+            with open('classes_info.json', 'r') as file:
+                stream_info = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
+                file.close()
 
-                cursor.execute('''
-                    INSERT INTO USER_INFO(USER_ID, USER_CLASS) VALUES(%s, %s);
-                    ''', (message.chat.id, message.text,))
+            if stream_info is not None:  # if we have such stream
+                cursor.execute('INSERT INTO USER_INFO(USER_ID, USER_CLASS) VALUES(%s, %s);',
+                               (message.chat.id, stream_info,))
 
                 disconnect(connection, cursor)
-
                 bot.send_message(message.chat.id,
-                                 'Вы выбрали класс (чтобы сменить, введите /reset)',
-                                 reply_markup=keyboard1)
-            else:
+                                 'Вы выбрали класс (чтобы сменить, введите /reset).', reply_markup=keyboard1)
+            else:  # if there are no such stream
                 bot.send_message(message.chat.id,
-                                 'Введите свой класс в указаном формате (10и1)')
+                                 'Похоже, что вы неправильно указали название класса, попробуйте еще раз (вот '
+                                 'образец: 10и1 или 10И1).')
 
     bot.polling(none_stop=True)
 

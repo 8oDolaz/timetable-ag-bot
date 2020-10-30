@@ -14,8 +14,11 @@ def database_update(data):
     cursor = connection.cursor()
     cursor.execute('TRUNCATE DAY CASCADE;')
 
-    for iteration in range(len(data)):  # all info in array so we need to go throw it
-        for day in data[iteration].keys():  # goes throw all objects
+    for iteration in range(len(data)):  # goes throe all days
+        for day in data[iteration].keys():
+            '''our iteration looks like this: ({ info here })
+            we need to take first object which is dictionary
+            we will take key from it (we can't take only one so we take all of them)'''
             cursor.execute('INSERT INTO DAY(DAY_NAME) VALUES (%s);', (day,))
 
             for time in data[iteration].get(day)[0]:  # [0] after get means that we take all subjects time
