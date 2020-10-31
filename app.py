@@ -73,7 +73,6 @@ def main():
     @bot.message_handler(func=lambda message: True, commands=['reset'])
     def reset(message):
         connection, cursor = connect_test()
-
         cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''', (message.chat.id,))  # delete this user from db
         disconnect(connection, cursor)
         bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
@@ -84,7 +83,9 @@ def main():
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
 
-        if len(cursor.fetchall()) != 0:  # if no such user in table
+        if len(cursor.fetchall()) != 0:
+
+            # if we have such user in table
             if message.text.lower() == 'сегодня':
 
                 connection, cursor = connect_main()
@@ -138,18 +139,19 @@ def main():
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard)
         else:
+            # if we haven't such user in table
             with open('classes_info.json', 'r') as file:
-                stream_info = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
+                stream = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
                 file.close()
 
-            if stream_info is not None:  # if we have such stream
+            if stream is not None:
                 cursor.execute('INSERT INTO USER_INFO(USER_ID, USER_CLASS) VALUES(%s, %s);',
-                               (message.chat.id, stream_info,))
+                               (message.chat.id, stream,))
 
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
                                  'Вы выбрали класс (чтобы сменить, введите /reset).', reply_markup=keyboard)
-            else:  # if there are no such stream
+            else:
                 bot.send_message(message.chat.id,
                                  'Похоже, что вы неправильно указали название класса, попробуйте еще раз (вот '
                                  'образец: 10и1 или 10И1).')
