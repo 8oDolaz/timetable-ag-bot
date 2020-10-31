@@ -6,17 +6,7 @@ import config
 
 def main():
 
-    def connect_main():
-        connection = ps2.connect(
-            database='dfsp85rbt6tna2',
-            host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-            user='rmpqgvxcfahbdg',
-            password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-            port=5432, )
-        cursor = connection.cursor()
-        return connection, cursor
-
-    def connect_test():
+    def connect_to_db():
         connection = ps2.connect(
             database='d9rkqtvh45pj8c',
             host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
@@ -62,7 +52,7 @@ def main():
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
     def start(message):
-        connection, cursor = connect_test()
+        connection, cursor = connect_to_db()
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
         if len(cursor.fetchall()) == 0:  # if user already exist
@@ -76,14 +66,14 @@ def main():
 
     @bot.message_handler(func=lambda message: True, commands=['reset'])
     def reset(message):
-        connection, cursor = connect_test()
+        connection, cursor = connect_to_db()
         cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''', (message.chat.id,))  # delete this user from db
         disconnect(connection, cursor)
         bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
 
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
     def main_bot(message):
-        connection, cursor = connect_test()
+        connection, cursor = connect_to_db()
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
 
@@ -92,7 +82,7 @@ def main():
             # if we have such user in table
             if message.text.lower() == 'сегодня':
 
-                connection, cursor = connect_test()
+                connection, cursor = connect_to_db()
 
                 cursor.execute('''
                 select user_stream from user_info where user_id=%s;
@@ -114,7 +104,7 @@ def main():
                                  reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'завтра':
 
-                connection, cursor = connect_test()
+                connection, cursor = connect_to_db()
 
                 cursor.execute('''
                 select user_stream from user_info where user_id=%s;
@@ -136,7 +126,7 @@ def main():
                                  reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'на неделю':
 
-                connection, cursor = connect_test()
+                connection, cursor = connect_to_db()
 
                 cursor.execute('''
                 select user_stream from user_info where user_id=%s;
