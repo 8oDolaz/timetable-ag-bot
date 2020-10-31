@@ -1,0 +1,43 @@
+import psycopg2 as ps2
+from parser import parse_timetable
+import json
+
+
+def database_update(data, stream):
+    connection = ps2.connect('your database info')
+    cursor = connection.cursor()
+
+    for iteration in range(len(data)):
+        for day in data[iteration].keys():
+            '''our iteration looks like this: ({ info here })
+            we need to take first object which is dictionary
+            we will take key from it (we can't take only one so we take all of them)'''
+
+            for time in data[iteration].get(day)[0]:  # [0] after get means that we take all subjects time
+                cursor.execute('insert into lessons_time(day, time, stream) values(%s, %s, %s)',
+                               (day, time, stream,))
+
+            for title in data[iteration].get(day)[1]:  # [1] after get means that we take all subjects title
+                cursor.execute('insert into lessons_title(day, title, stream) values(%s, %s, %s)',
+                               (day, title, stream))
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+connection = ps2.connect('your database info')
+cursor = connection.cursor()
+cursor.execute('''
+truncate lessons_time;
+truncate lessons_title;
+''')
+connection.commit()
+cursor.close()
+connection.close()
+
+with open('streams_info.json', 'r') as db:
+    streams = json.load(db)
+
+for key in streams.keys():
+    stream = streams.get(key)
+    database_update(parse_timetable(stream), stream)
