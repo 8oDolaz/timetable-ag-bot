@@ -27,17 +27,21 @@ def main():
         cursor = connection.cursor()
         return connection, cursor
 
-    def disconnect(connect, cursor):
-        connect.commit()
+    def disconnect(connection, cursor):
+        connection.commit()
         cursor.close()
-        connect.close()
+        connection.close()
 
-    def get_time_title(day, cursor):
-        cursor.execute('SELECT TIME FROM LESSONS_TIME WHERE DAY_NAME=%s;', (day,))
-        time = [item for item in cursor.fetchall()]  # item[0] because second field is day and we don't need it
+    def get_time_title(cursor, day, stream):
+        cursor.execute('''
+        select time from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
+        ''', (day, stream,))
+        time = [item[0] for item in cursor.fetchall()]
 
-        cursor.execute('SELECT TITLE FROM LESSONS_TITLE WHERE DAY_NAME=%s;', (day,))
-        title = [item for item in cursor.fetchall()]  # item[0] because second field is day and we don't need it
+        cursor.execute('''
+        select title from lessons_title where(position(%s in lessons_title.day) > 0 and lessons_title.stream=%s);
+        ''', (day, stream,))
+        title = [item[0] for item in cursor.fetchall()]
 
         return time, title
 
@@ -88,13 +92,20 @@ def main():
             # if we have such user in table
             if message.text.lower() == 'сегодня':
 
-                connection, cursor = connect_main()
+                connection, cursor = connect_test()
 
-                cursor.execute('SELECT * FROM DAY;')
-                day = cursor.fetchall()[0][0]
-                time, title = get_time_title(day, cursor)
+                cursor.execute('''
+                select user_stream from user_info where user_id=%s;
+                ''', (message.chat.id,))
+                user_stream = cursor.fetchall()[0][0]
 
-                answer_today = prepare_answer(day, time, title)
+                cursor.execute('''
+                select day from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
+                ''', ('19', user_stream))
+
+                time, title = get_time_title(cursor, '19', user_stream)
+
+                answer_today = prepare_answer('понедельник, 19 октября', time, title)
 
                 disconnect(connection, cursor)
 
@@ -103,13 +114,20 @@ def main():
                                  reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'завтра':
 
-                connection, cursor = connect_main()
+                connection, cursor = connect_test()
 
-                cursor.execute('SELECT * FROM DAY;')
-                day = cursor.fetchall()[1][0]
-                time, title = get_time_title(day, cursor)
+                cursor.execute('''
+                select user_stream from user_info where user_id=%s;
+                ''', (message.chat.id,))
+                user_stream = cursor.fetchall()[0][0]
 
-                answer_tomorrow = prepare_answer(day, time, title)
+                cursor.execute('''
+                select day from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
+                ''', ('19', user_stream))
+
+                time, title = get_time_title(cursor, '20', user_stream)
+
+                answer_tomorrow = prepare_answer('вторник, 20 октября', time, title)
 
                 disconnect(connection, cursor)
 
@@ -118,34 +136,34 @@ def main():
                                  reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'на неделю':
 
-                connection, cursor = connect_main()
+                connection, cursor = connect_test()
 
-                answer_week = ''
+                cursor.execute('''
+                select user_stream from user_info where user_id=%s;
+                ''', (message.chat.id,))
+                user_stream = cursor.fetchall()[0][0]
 
-                cursor.execute('SELECT * FROM DAY;')
-                days = cursor.fetchall()
-                for day in days:
-                    # we need to take first one to prevent error (there are only one object)
-                    time, title = get_time_title(day[0], cursor)
-                    answer_week += prepare_answer(day[0], time, title) + '\n'
+                days_title = ['понедельник, 19 октябра', 'вторник, 20 октября', 'среда, 21 октября',
+                              'четвеврг, 22 откября', 'пятница, 23 октября', 'среда, 24 октября']
+                day_date = ['19', '20', '21', '22', '23', '24']
+
+                for day in range(len(day_date)):
+                    time, title = get_time_title(cursor, day_date[day], user_stream)
+                    bot.send_message(message.chat.id, prepare_answer(days_title[day], time, title))
 
                 disconnect(connection, cursor)
-
-                bot.send_message(message.chat.id,
-                                 answer_week,
-                                 reply_markup=keyboard)  # send a message
             else:
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard)
         else:
             # if we haven't such user in table
-            with open('classes_info.json', 'r') as file:
+            with open('streams_info.json', 'r') as file:
                 stream = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
                 file.close()
 
             if stream is not None:
-                cursor.execute('INSERT INTO USER_INFO(USER_ID, USER_CLASS) VALUES(%s, %s);',
+                cursor.execute('INSERT INTO USER_INFO(USER_ID, USER_STREAM) VALUES(%s, %s);',
                                (message.chat.id, stream,))
 
                 disconnect(connection, cursor)

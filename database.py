@@ -1,35 +1,55 @@
 import psycopg2 as ps2
 from parser import parse_timetable
+import json
 
 
-def database_update(data):
+def database_update(data, stream):
     connection = ps2.connect(
-        database='dfsp85rbt6tna2',
-        host='ec2-54-217-204-34.eu-west-1.compute.amazonaws.com',
-        user='rmpqgvxcfahbdg',
-        password='935a6af6648144a4044c436a75d94d989084cb84d19c8229a6b6c9690240aafb',
-        port='5432',
+        database='d9rkqtvh45pj8c',
+        host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
+        port=5432,
+        user='zwlligehjlxrxw',
+        password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
     )
-
     cursor = connection.cursor()
-    cursor.execute('TRUNCATE DAY CASCADE;')
 
-    for iteration in range(len(data)):  # goes throe all days
+    for iteration in range(len(data)):
         for day in data[iteration].keys():
             '''our iteration looks like this: ({ info here })
             we need to take first object which is dictionary
             we will take key from it (we can't take only one so we take all of them)'''
-            cursor.execute('INSERT INTO DAY(DAY_NAME) VALUES (%s);', (day,))
 
             for time in data[iteration].get(day)[0]:  # [0] after get means that we take all subjects time
-                cursor.execute('INSERT INTO LESSONS_TIME(TIME, DAY_NAME) VALUES (%s, %s);', (time, day,))
+                cursor.execute('insert into lessons_time(day, time, stream) values(%s, %s, %s)',
+                               (day, time, stream,))
 
             for title in data[iteration].get(day)[1]:  # [1] after get means that we take all subjects title
-                cursor.execute('INSERT INTO LESSONS_TITLE(TITLE, DAY_NAME) VALUES (%s, %s);', (title, day,))
+                cursor.execute('insert into lessons_title(day, title, stream) values(%s, %s, %s)',
+                               (day, title, stream))
 
     connection.commit()
     cursor.close()
-    connection.close()  # determinate connection
+    connection.close()
 
+connection = ps2.connect(
+        database='d9rkqtvh45pj8c',
+        host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
+        port=5432,
+        user='zwlligehjlxrxw',
+        password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
+    )
+cursor = connection.cursor()
+cursor.execute('''
+truncate lessons_time;
+truncate lessons_title;
+''')
+connection.commit()
+cursor.close()
+connection.close()
 
-database_update(parse_timetable())
+with open('streams_info.json', 'r') as db:
+    streams = json.load(db)
+
+for key in streams.keys():
+    stream = streams.get(key)
+    database_update(parse_timetable(stream), stream)

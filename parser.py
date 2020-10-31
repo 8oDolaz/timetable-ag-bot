@@ -3,12 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def parse_timetable():
+def parse_timetable(stream):
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')  # example: 2020-09-09
+    now = '2020-10-19'
 
     # website link for actual day
-    url_lessons = f'https://timetable.spbu.ru/AGSM/StudentGroupEvents/Primary/275100/%s' % now
+    url_lessons = f'https://timetable.spbu.ru/AGSM/StudentGroupEvents/Primary/%s/%s' % (stream, now)
     # send a get request
     request = requests.get(url_lessons, headers={'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'})
 
