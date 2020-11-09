@@ -139,7 +139,7 @@ def main():
                                (message.chat.id,))  # delete this user from db
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
-                                 'Ваш класс сброшен! Теперь, ' + config.instruction[1].lower() + config.instruction[1:])
+                                 'Ваш класс сброшен! Теперь, ' + config.instruction[1].lower() + config.instruction[0:])
             else:
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
