@@ -2,6 +2,7 @@ import telebot
 import psycopg2 as ps2
 import json
 import config
+import datetime
 
 
 def main():
@@ -22,18 +23,19 @@ def main():
         cursor.close()
         connection.close()
 
-    def get_time_title(cursor, day, stream):
+    def get_day_time_title(cursor, day, stream):
         cursor.execute('''
-        select time from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
+        select time, day from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
         ''', (day, stream,))
-        time = [item[0] for item in cursor.fetchall()]
+        info = cursor.fetchall()
+        time, date = [item[0] for item in info], [item[1] for item in info]
 
         cursor.execute('''
         select title from lessons_title where(position(%s in lessons_title.day) > 0 and lessons_title.stream=%s);
         ''', (day, stream,))
         title = [item[0] for item in cursor.fetchall()]
 
-        return time, title
+        return date, time, title
 
     def prepare_answer(day, time, title, s=''):
         # day[0].upper() - first letter is now upper!
@@ -42,9 +44,6 @@ def main():
             # I don't know where is the problem but I need to delete spaces here
             s += time[item].replace(' ', '') + ' ' + title[item] + '\n'
         return s
-
-    salute = "Привет! Для начала выбери свой класс:\nПожалуйста, введи в таком формате: '10И1' ('10' - класс, " \
-             "'И' - твое направление, '1' - твоя группа) "
 
     bot = telebot.TeleBot(config.token)  # bot with our token
 
@@ -57,7 +56,7 @@ def main():
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
         if len(cursor.fetchall()) == 0:  # if user already exist
             bot.send_message(message.chat.id,
-                             salute,
+                             config.salute,
                              reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id,
@@ -83,19 +82,17 @@ def main():
             if message.text.lower() == 'сегодня':
 
                 connection, cursor = connect_to_db()
+                date = datetime.datetime.today().strftime('%d')
+                date = date[1:] if date[0] == '0' else date
 
                 cursor.execute('''
                 select user_stream from user_info where user_id=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
-                cursor.execute('''
-                select day from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
-                ''', ('19', user_stream))
+                day_info = get_day_time_title(cursor, date, user_stream)
 
-                time, title = get_time_title(cursor, '19', user_stream)
-
-                answer_today = prepare_answer('понедельник, 19 октября', time, title)
+                answer_today = prepare_answer(day_info[0][0], day_info[1], day_info[2])
 
                 disconnect(connection, cursor)
 
@@ -105,19 +102,17 @@ def main():
             elif message.text.lower() == 'завтра':
 
                 connection, cursor = connect_to_db()
+                date = (datetime.datetime.today() + datetime.timedelta(days=1)).strftime('%d')
+                date = date[1:] if date[0] == '0' else date
 
                 cursor.execute('''
                 select user_stream from user_info where user_id=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
-                cursor.execute('''
-                select day from lessons_time where(position(%s in lessons_time.day) > 0 and lessons_time.stream=%s);
-                ''', ('19', user_stream))
+                day_info = get_day_time_title(cursor, date, user_stream)
 
-                time, title = get_time_title(cursor, '20', user_stream)
-
-                answer_tomorrow = prepare_answer('вторник, 20 октября', time, title)
+                answer_tomorrow = prepare_answer(day_info[0][0], day_info[1], day_info[2])
 
                 disconnect(connection, cursor)
 
@@ -133,13 +128,17 @@ def main():
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
-                days_title = ['понедельник, 19 октябра', 'вторник, 20 октября', 'среда, 21 октября',
-                              'четвеврг, 22 откября', 'пятница, 23 октября', 'среда, 24 октября']
-                day_date = ['19', '20', '21', '22', '23', '24']
+                for delta in range(0, 6):
+                    date = (datetime.datetime.today() + datetime.timedelta(days=delta)).strftime('%d')
+                    date = date[1:] if date[0] == '0' else date
 
-                for day in range(len(day_date)):
-                    time, title = get_time_title(cursor, day_date[day], user_stream)
-                    bot.send_message(message.chat.id, prepare_answer(days_title[day], time, title))
+                    day_info = get_day_time_title(cursor, date, user_stream)
+
+                    answer = prepare_answer(day_info[0][0], day_info[1], day_info[2])
+
+                    bot.send_message(message.chat.id,
+                                     answer,
+                                     reply_markup=keyboard)
 
                 disconnect(connection, cursor)
             else:

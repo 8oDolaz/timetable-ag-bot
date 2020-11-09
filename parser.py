@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 def parse_timetable(stream):
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')  # example: 2020-09-09
-    now = '2020-10-19'
 
     # website link for actual day
     url_lessons = f'https://timetable.spbu.ru/AGSM/StudentGroupEvents/Primary/%s/%s' % (stream, now)
