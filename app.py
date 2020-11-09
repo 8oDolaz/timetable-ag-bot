@@ -69,9 +69,8 @@ def main():
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
 
-        if len(cursor.fetchall()) != 0:
+        if len(cursor.fetchall()) != 0:  # if we have such user in table
 
-            # if we have such user in table
             if message.text.lower() == 'сегодня':
 
                 connection, cursor = connect_to_db()
@@ -156,11 +155,11 @@ def main():
 
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
-                                 'Вы выбрали класс (чтобы сменить, введите /reset).', reply_markup=keyboard)
+                                 'Вы выбрали класс (чтобы сменить, введите нажмите на нижнюю кнопку).',
+                                 reply_markup=keyboard)
             else:
                 bot.send_message(message.chat.id,
-                                 'Похоже, что вы неправильно указали название класса, попробуйте еще раз (вот '
-                                 'образец: 10и1 или 10И1).')
+                                 config.ininstruction)
 
     bot.polling(none_stop=True)
 
