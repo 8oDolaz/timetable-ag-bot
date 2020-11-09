@@ -140,7 +140,7 @@ def main():
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
                                  'Ваш класс сброшен! Теперь, ' + config.instruction[1].lower() + config.instruction[0:])
-            else:
+            else:  # if we don't know what user typed
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard)
@@ -150,7 +150,7 @@ def main():
                 stream = (json.load(file)).get(message.text.lower())  # json.load(file) returns a dictionary
                 file.close()
 
-            if stream is not None:
+            if stream is not None:  # if we have such stream
                 cursor.execute('INSERT INTO USER_INFO(USER_ID, USER_STREAM) VALUES(%s, %s);',
                                (message.chat.id, stream,))
 
@@ -158,7 +158,7 @@ def main():
                 bot.send_message(message.chat.id,
                                  'Вы выбрали класс (чтобы сменить, нажмите на нижнюю кнопку).',
                                  reply_markup=keyboard)
-            else:
+            else:  # if we haven't such user in stream
                 bot.send_message(message.chat.id,
                                  config.instruction)
 

@@ -3,7 +3,7 @@ from parser import parse_timetable
 import json
 
 
-def database_update(data, stream):
+def connect_to_db():
     connection = ps2.connect(
         database='d9rkqtvh45pj8c',
         host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
@@ -12,6 +12,17 @@ def database_update(data, stream):
         password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
     )
     cursor = connection.cursor()
+    return connection, cursor
+
+
+def disconnect(connection, cursor):
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+def database_update(data, stream):
+    connection, cursor = connect_to_db()
 
     for iteration in range(len(data)):
         for day in data[iteration].keys():
@@ -27,25 +38,15 @@ def database_update(data, stream):
                 cursor.execute('insert into lessons_title(day, title, stream) values(%s, %s, %s)',
                                (day, title, stream))
 
-    connection.commit()
-    cursor.close()
-    connection.close()
+    disconnect(connection, cursor)
 
-connection = ps2.connect(
-        database='d9rkqtvh45pj8c',
-        host='ec2-176-34-123-50.eu-west-1.compute.amazonaws.com',
-        port=5432,
-        user='zwlligehjlxrxw',
-        password='e233e3aed49ebfb74cd270b8d1dda3bcc6838036c32eeb52de2038d856475b09'
-    )
-cursor = connection.cursor()
+
+connection, cursor = connect_to_db()
 cursor.execute('''
 truncate lessons_time;
 truncate lessons_title;
 ''')
-connection.commit()
-cursor.close()
-connection.close()
+disconnect(connection, cursor)
 
 with open('streams_info.json', 'r') as db:
     streams = json.load(db)
