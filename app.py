@@ -63,13 +63,6 @@ def main():
                              'Мы уже занем ваш класс (чтобы сменить его введите /reset)',
                              reply_markup=keyboard)
 
-    @bot.message_handler(func=lambda message: True, commands=['reset'])
-    def reset(message):
-        connection, cursor = connect_to_db()
-        cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''', (message.chat.id,))  # delete this user from db
-        disconnect(connection, cursor)
-        bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
-
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
     def main_bot(message):
         connection, cursor = connect_to_db()
@@ -141,6 +134,12 @@ def main():
                                      reply_markup=keyboard)
 
                 disconnect(connection, cursor)
+            elif message.text.lower() == 'сменить класс':
+                connection, cursor = connect_to_db()
+                cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''',
+                               (message.chat.id,))  # delete this user from db
+                disconnect(connection, cursor)
+                bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
             else:
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
