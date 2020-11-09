@@ -159,7 +159,7 @@ def main():
                                  reply_markup=keyboard)
             else:
                 bot.send_message(message.chat.id,
-                                 config.ininstruction)
+                                 config.instruction)
 
     bot.polling(none_stop=True)
 
