@@ -55,9 +55,7 @@ def main():
 
         cursor.execute('SELECT USER_ID FROM USER_INFO WHERE USER_ID=%s', (message.chat.id,))
         if len(cursor.fetchall()) == 0:  # if user already exist
-            bot.send_message(message.chat.id,
-                             config.salute,
-                             reply_markup=keyboard)
+            bot.send_message(message.chat.id, 'Привет' + config.instruction, reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id,
                              'Мы уже занем ваш класс (чтобы сменить его нажмите на кнопку)',
