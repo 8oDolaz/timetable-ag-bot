@@ -60,7 +60,7 @@ def main():
                              reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id,
-                             'Мы уже занем ваш класс (чтобы сменить его введите /reset)',
+                             'Мы уже занем ваш класс (чтобы сменить его нажмите на кнопку)',
                              reply_markup=keyboard)
 
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
@@ -156,7 +156,7 @@ def main():
 
                 disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
-                                 'Вы выбрали класс (чтобы сменить, введите нажмите на нижнюю кнопку).',
+                                 'Вы выбрали класс (чтобы сменить, нажмите на нижнюю кнопку).',
                                  reply_markup=keyboard)
             else:
                 bot.send_message(message.chat.id,
