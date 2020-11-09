@@ -138,7 +138,8 @@ def main():
                 cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''',
                                (message.chat.id,))  # delete this user from db
                 disconnect(connection, cursor)
-                bot.send_message(message.chat.id, 'Ваш класс сброшен! Теперь, введите его снова.')
+                bot.send_message(message.chat.id,
+                                 'Ваш класс сброшен! Теперь, ' + config.instruction[1].lower() + config.instruction[1:])
             else:
                 bot.send_message(message.chat.id,
                                  'Пожалуйста, выберете одну из опций',
