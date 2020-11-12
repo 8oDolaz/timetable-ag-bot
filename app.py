@@ -58,6 +58,7 @@ def main():
             bot.send_message(message.chat.id,
                              config.salute,
                              reply_markup=keyboard)
+            bot.send_message(message.chat.id, 'Привет' + config.instruction, reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id,
                              'Мы уже занем ваш класс (чтобы сменить его нажмите на кнопку)',
@@ -136,6 +137,7 @@ def main():
                         pass
 
                 disconnect(connection, cursor)
+
             elif message.text.lower() == 'сменить класс':
                 connection, cursor = connect_to_db()
                 cursor.execute('''DELETE FROM USER_INFO WHERE USER_ID=%s;''',
