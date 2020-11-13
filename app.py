@@ -61,7 +61,7 @@ def main():
             s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) +' '+ '('+delete_spaces(place[item])+')' + '\n'
         return s
 
-    bot = telebot.TeleBot(config.test_token)  # bot with our token
+    bot = telebot.TeleBot(config.token)  # bot with our token
 
     keyboard = config.keyboard1
 
