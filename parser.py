@@ -3,15 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 
 
-<<<<<<< HEAD
 def lesson_type(string):
     if string.lower().count('дист') != 0:
         return 'Дист.'
     return 'Очно'
 
 
-=======
->>>>>>> 3817aab925dc454e8eb47ada8525407e39ba2ffc
 def parse_timetable(stream):
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')  # example: 2020-09-09
@@ -28,11 +25,8 @@ def parse_timetable(stream):
     all_data = []  # empty array for all information
 
     for item in all_info:  # go in all info
-<<<<<<< HEAD
         title_m, time_m, type_m = [], [], []  # empty arrays for time and subject
-=======
-        title_m, time_m = [], []  # empty arrays for time and subject
->>>>>>> 3817aab925dc454e8eb47ada8525407e39ba2ffc
+
         # prepare data (a lot of useless symbols)
         date = item.find('h4', {'class': 'panel-title'}).text.replace(' ', '', 20).replace('\n', '').replace('\r', '')
         # replacing spaces after text
@@ -47,7 +41,6 @@ def parse_timetable(stream):
             title = title[:(title.find(','))]
             title_m.append(title)  # find and add all lessons title
 
-<<<<<<< HEAD
         types = item.find_all('div', {'class': 'col-sm-3 studyevent-locations'})
         for place in types:
             type = place.find_all('span')
@@ -55,8 +48,5 @@ def parse_timetable(stream):
                 type_m.append(lesson_type(iter.text))
 
         all_data.append({date: [time_m, title_m, type_m]})  # add everything to the array
-=======
-        all_data.append({date: [time_m, title_m]})  # add everything to the array
->>>>>>> 3817aab925dc454e8eb47ada8525407e39ba2ffc
 
     return all_data
