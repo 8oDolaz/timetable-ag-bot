@@ -57,7 +57,7 @@ def main():
         s += day[0].upper() + day[1:] + '\n'
         for item in range(len(time)):
             # I don't know where is the problem but I need to delete spaces here
-            s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) + '\n' #''+ '('+delete_spaces(place[item])+')' + '\n'
+            s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
         return s
 
     bot = telebot.TeleBot(config.token)  # bot with our token
@@ -137,19 +137,17 @@ def main():
                 user_stream = cursor.fetchall()[0][0]
 
                 for delta in range(0, 7):
-                    date = (datetime.datetime.today() + datetime.timedelta(days=delta)).strftime('%d')
-                    date = date[1:] if date[0] == '0' else date
+                    date = (datetime.datetime.today() + datetime.timedelta(days=delta))
+                    if date.isoweekday() != 7:
+                        date = date.strftime('%d')[1:] if date.strftime('%d')[0] == '0' else date
 
-                    day_info = get_all_info_day(cursor, date, user_stream)
+                        day_info = get_all_info_day(cursor, date.strftime('%d'), user_stream)
 
-                    try:
                         answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
                         bot.send_message(message.chat.id,
                                          answer,
                                          reply_markup=keyboard)
-                    except IndexError:
-                        pass
 
                 disconnect(connection, cursor)
             elif message.text.lower() == 'сменить класс':
