@@ -142,7 +142,7 @@ def main():
                         date = date.strftime('%d')
                         date = date[1:] if date[0] == '0' else date
 
-                        day_info = get_all_info_day(cursor, date.strftime('%d'), user_stream)
+                        day_info = get_all_info_day(cursor, date, user_stream)
 
                         answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
