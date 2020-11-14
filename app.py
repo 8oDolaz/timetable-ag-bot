@@ -139,7 +139,8 @@ def main():
                 for delta in range(0, 7):
                     date = (datetime.datetime.today() + datetime.timedelta(days=delta))
                     if date.isoweekday() != 7:
-                        date = date.strftime('%d')[1:] if date.strftime('%d')[0] == '0' else date
+                        date = date.strftime('%d')
+                        date = date[1:] if date[0] == '0' else date
 
                         day_info = get_all_info_day(cursor, date.strftime('%d'), user_stream)
 
