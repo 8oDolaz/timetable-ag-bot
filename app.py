@@ -28,6 +28,7 @@ def main():
             port=5432,
             password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
         )
+        return connection, connection.cursor
 
     def disconnect(connection, cursor):
         connection.commit()
