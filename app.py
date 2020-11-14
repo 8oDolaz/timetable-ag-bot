@@ -21,7 +21,13 @@ def main():
         return string
 
     def connect_to_db():
-        connection = ps2.connect('your database')
+        connection = ps2.connect(
+            host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
+            database='deocs7tolmvlhl',
+            user='kvrovbpxebvygf',
+            port=5432,
+            password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
+        )
 
     def disconnect(connection, cursor):
         connection.commit()
@@ -98,24 +104,44 @@ def main():
                                  reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'завтра':
 
-                connection, cursor = connect_to_db()
-                date = (datetime.datetime.today() + datetime.timedelta(days=1)).strftime('%d')
-                date = date[1:] if date[0] == '0' else date
+                try:
+                    connection, cursor = connect_to_db()
+                    date = (datetime.datetime.today() + datetime.timedelta(days=1)).strftime('%d')
+                    date = date[1:] if date[0] == '0' else date
 
-                cursor.execute('''
-                select c2 from user_info where c1=%s;
-                ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]
+                    cursor.execute('''
+                    select c2 from user_info where c1=%s;
+                    ''', (message.chat.id,))
+                    user_stream = cursor.fetchall()[0][0]
 
-                day_info = get_all_info_day(cursor, date, user_stream)
+                    day_info = get_all_info_day(cursor, date, user_stream)
 
-                answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                disconnect(connection, cursor)
+                    disconnect(connection, cursor)
 
-                bot.send_message(message.chat.id,
-                                 answer_tomorrow,
-                                 reply_markup=keyboard)  # send a message with timetable
+                    bot.send_message(message.chat.id,
+                                     answer_tomorrow,
+                                     reply_markup=keyboard)  # send a message with timetable
+                except IndexError:
+                    connection, cursor = connect_to_db()
+                    date = (datetime.datetime.today() + datetime.timedelta(days=2)).strftime('%d')
+                    date = date[1:] if date[0] == '0' else date
+
+                    cursor.execute('''
+                                        select c2 from user_info where c1=%s;
+                                        ''', (message.chat.id,))
+                    user_stream = cursor.fetchall()[0][0]
+
+                    day_info = get_all_info_day(cursor, date, user_stream)
+
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+
+                    disconnect(connection, cursor)
+
+                    bot.send_message(message.chat.id,
+                                     answer_tomorrow,
+                                     reply_markup=keyboard)  # send a message with timetable
             elif message.text.lower() == 'на неделю':
 
                 connection, cursor = connect_to_db()

@@ -1,6 +1,6 @@
 import telebot
 
-token = 'token'
+token = '1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M'
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # add a keyboard
 button1 = telebot.types.KeyboardButton('Сегодня')
