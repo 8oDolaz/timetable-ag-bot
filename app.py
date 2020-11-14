@@ -57,7 +57,7 @@ def main():
         s += day[0].upper() + day[1:] + '\n'
         for item in range(len(time)):
             # I don't know where is the problem but I need to delete spaces here
-            s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) +' '+ '('+delete_spaces(place[item])+')' + '\n'
+            s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) + '\n' #''+ '('+delete_spaces(place[item])+')' + '\n'
         return s
 
     bot = telebot.TeleBot(config.token)  # bot with our token
@@ -112,8 +112,11 @@ def main():
                 user_stream = cursor.fetchall()[0][0]
 
                 date = (datetime.datetime.today() + datetime.timedelta(days=1))
+                # looking for tomorrow date
                 date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 7 else date.strftime('%d')
+                # we try to find out is it wednesday or not
                 date = date[1:] if date[0] == '0' else date
+                # take of first 0
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
