@@ -22,8 +22,6 @@ def main():
 
     def connect_to_db():
         connection = ps2.connect('your database')
-        cursor = connection.cursor()
-        return connection, cursor
 
     def disconnect(connection, cursor):
         connection.commit()
@@ -74,7 +72,6 @@ def main():
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # to see a timetable
     def main_bot(message):
         connection, cursor = connect_to_db()
-
         cursor.execute('SELECT USER_INFO FROM USER_INFO WHERE c1=%s', (message.chat.id,))
 
         if len(cursor.fetchall()) != 0:  # if we have such user in table
