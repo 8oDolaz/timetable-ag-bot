@@ -86,8 +86,12 @@ def main():
             if message.text.lower() == 'сегодня':
 
                 connection, cursor = connect_to_db()
-                date = datetime.datetime.today().strftime('%d')
+                date = datetime.datetime.today()
+                # looking for tomorrow date
+                date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 7 else date.strftime('%d')
+                # we try to find out is it wednesday or not
                 date = date[1:] if date[0] == '0' else date
+                # take of first 0
 
                 cursor.execute('''
                 select c2 from user_info where c1=%s;
