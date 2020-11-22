@@ -117,7 +117,7 @@ def main():
 
                 date = (datetime.datetime.today() + datetime.timedelta(days=1))
                 # looking for tomorrow date
-                date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 7 else date.strftime('%d')
+                date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 1 else date.strftime('%d')
                 # we try to find out is it wednesday or not
                 date = date[1:] if date[0] == '0' else date
                 # take of first 0
