@@ -11,7 +11,7 @@ def get_date(date):
     # если вначале есть 0, то убираем его
     date = date[1:] if date[0] == '0' else date
     # устонавливаем русский язык
-    locale.setlocale(locale.LC_ALL, 'ru_RU')
+    locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
     # получаем финальное название дня
     return list(calendar.day_name)[day_in_week] + ', ' + date
 
