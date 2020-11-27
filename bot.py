@@ -1,64 +1,11 @@
 import telebot
-import psycopg2 as ps2
 import json
 import config
 import datetime
+from functions import *
 
 
 def main():
-
-    def delete_spaces(string):
-        for i in range(len(string)):
-            if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
-                string = string[i:]
-                break
-
-        for i in reversed(range(len(string))):
-            if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
-                string = string[:i + 1]
-                break
-
-        return string
-
-    def connect_to_db():
-        connection = ps2.connect(
-            host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
-            database='deocs7tolmvlhl',
-            user='kvrovbpxebvygf',
-            port=5432,
-            password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
-        )
-        return connection, connection.cursor()
-
-    def disconnect(connection, cursor):
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-    def get_all_info_day(cursor, day, stream):
-        cursor.execute('''
-        select * from day_info where
-        (position(%s in day_info.day) > 0 and day_info.stream=%s)
-        ''', (day, stream,))
-
-        time, title, _day, type = [], [], [], []
-        info = cursor.fetchall()
-
-        for i in range(len(info)):
-            time.append(info[i][0])
-            title.append(info[i][1])
-            type.append(info[i][2])
-            _day.append(info[i][3])
-
-        return time, title, _day, type
-
-    def prepare_answer(day, time, title, place, s=''):
-        # day[0].upper() - first letter is now upper!
-        s += day[0].upper() + day[1:] + '\n'
-        for item in range(len(time)):
-            # I don't know where is the problem but I need to delete spaces here
-            s += time[item].replace(' ', '') +' '+ delete_spaces(title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
-        return s
 
     bot = telebot.TeleBot(config.token)  # bot with our token
 
@@ -86,12 +33,12 @@ def main():
             if message.text.lower() == 'сегодня':
 
                 connection, cursor = connect_to_db()
+
+                # берем сегодняшнюю дату
                 date = datetime.datetime.today()
-                # looking for tomorrow date
-                date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 7 else date.strftime('%d')
-                # we try to find out is it wednesday or not
-                date = date[1:] if date[0] == '0' else date
-                # take of first 0
+                # смотрим, воскресенье это или нет
+                date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
+                date = get_date(date)
 
                 cursor.execute('''
                 select c2 from user_info where c1=%s;
@@ -115,12 +62,11 @@ def main():
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
+                # берем сегодняшнюю дату
                 date = (datetime.datetime.today() + datetime.timedelta(days=1))
-                # looking for tomorrow date
-                date = (date + datetime.timedelta(days=1)).strftime('%d') if date.isoweekday() == 1 else date.strftime('%d')
-                # we try to find out is it wednesday or not
-                date = date[1:] if date[0] == '0' else date
-                # take of first 0
+                # смотрим, воскресенье это или нет
+                date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 1 else date
+                date = get_date(date)
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
@@ -143,8 +89,7 @@ def main():
                 for delta in range(0, 7):
                     date = (datetime.datetime.today() + datetime.timedelta(days=delta))
                     if date.isoweekday() != 7:
-                        date = date.strftime('%d')
-                        date = date[1:] if date[0] == '0' else date
+                        date = get_date(date)
 
                         day_info = get_all_info_day(cursor, date, user_stream)
 

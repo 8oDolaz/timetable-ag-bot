@@ -1,24 +1,6 @@
-import psycopg2 as ps2
 from parser import parse_timetable
 import json
-
-
-def connect_to_db():
-    connection = ps2.connect(
-        host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
-        database='deocs7tolmvlhl',
-        user='kvrovbpxebvygf',
-        port=5432,
-        password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
-    )
-    cursor = connection.cursor()
-    return connection, cursor
-
-
-def disconnect(connection, cursor):
-    connection.commit()
-    cursor.close()
-    connection.close()
+from functions import *
 
 
 def database_update(data, stream):
