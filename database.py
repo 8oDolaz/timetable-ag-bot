@@ -8,11 +8,10 @@ def database_update(data, stream):
 
     for iteration in range(len(data)):
         for day in data[iteration].keys():
-            '''our iteration looks like this: ({ info here })
-            we need to take first object which is dictionary
-            we will take key from it (we can't take only one so we take all of them)'''
+            '''наш iteration выглядит вот так ({ инфо. })
+            получается, что нам нужно брать первый объект словаря'''
 
-            info = data[iteration].get(day)
+            info = data[iteration].get(day)  # берем все, что будем записывать в базу данных
             for i in range(len(info[0])):
                 try:
                     time, title, type = info[0][i], info[1][i], info[2][i]

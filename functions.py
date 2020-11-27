@@ -9,7 +9,7 @@ days = {
     'Friday' : 'пятница',
     'Saturday': 'суббота',
     'Sunday': 'воскресенье',
-}
+}  # этот словарь нужен для "первода" дней недели
 
 
 def get_date(date):
@@ -24,6 +24,8 @@ def get_date(date):
 
 
 def delete_spaces(string):
+    # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
+    # чтобы удалить все лишнее пробелы
     for i in range(len(string)):
         if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
             string = string[i:]
@@ -37,8 +39,8 @@ def delete_spaces(string):
     return string
 
 
-def connect_to_db():
-    connection = ps2.connect(
+def connect_to_db():  # это функция подключает нас к базе данных
+    connection = ps2.connect(  # сюда мы передаем всё необходимое
         host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
         database='deocs7tolmvlhl',
         user='kvrovbpxebvygf',
@@ -48,13 +50,13 @@ def connect_to_db():
     return connection, connection.cursor()
 
 
-def disconnect(connection, cursor):
+def disconnect(connection, cursor):  # эта функция просто нас отключает
     connection.commit()
     cursor.close()
     connection.close()
 
 
-def get_all_info_day(cursor, day, stream):
+def get_all_info_day(cursor, day, stream):  # это функция возвращает все что нужно для формирования сообщения
     cursor.execute('''
     select * from day_info where
     (position(%s in day_info.day) > 0 and day_info.stream=%s)
@@ -63,7 +65,7 @@ def get_all_info_day(cursor, day, stream):
     time, title, _day, type = [], [], [], []
     info = cursor.fetchall()
 
-    for i in range(len(info)):
+    for i in range(len(info)):  # вот именно здесь мы записываем все необходимое
         time.append(info[i][0])
         title.append(info[i][1])
         type.append(info[i][2])
@@ -72,11 +74,11 @@ def get_all_info_day(cursor, day, stream):
     return time, title, _day, type
 
 
-def prepare_answer(day, time, title, place, s=''):
-    # day[0].upper() - first letter is now upper!
+def prepare_answer(day, time, title, place, s=''):  # здесь мы формируем само сообщение
+    # day[0].upper() —— теперь первая буква заглавная!
     s += day[0].upper() + day[1:] + '\n'
     for item in range(len(time)):
-        # I don't know where is the problem but I need to delete spaces here
-        s += time[item].replace(' ', '') + ' ' + delete_spaces(
-            title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
+        # Я не знаю где эта проблема, но пробелы я должен удалять здесь
+        s += time[item].replace(' ', '') + ' ' + delete_spaces(title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
+        # Возможно, когда-то, я добавлю Очно или Дистанционо
     return s
