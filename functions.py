@@ -1,19 +1,26 @@
-import locale
 import calendar
 import psycopg2 as ps2
+
+days = {
+    'Monday': 'понедельник',
+    'Tuesday': 'вторник',
+    'Wednesday': 'среда',
+    'Thursday': 'четверг',
+    'Friday' : 'пятница',
+    'Saturday': 'суббота',
+    'Sunday': 'воскресенье',
+}
 
 
 def get_date(date):
     # берем номер нашего дня в неделе
-    # day_in_week = date.isoweekday() - 1
+    day_in_week = date.isoweekday() - 1
     # берем дату это для
     date = date.strftime('%d')
     # если вначале есть 0, то убираем его
     date = date[1:] if date[0] == '0' else date
-    # устонавливаем русский язык
-    # locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
     # получаем финальное название дня
-    return date # list(calendar.day_name)[day_in_week] + ', ' +
+    return days.get(list(calendar.day_name)[day_in_week]) + ', ' +  date
 
 
 def delete_spaces(string):
