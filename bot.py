@@ -134,11 +134,14 @@ def main():
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
 
-                # берем завтрашнюю дату
-                date = (datetime.datetime.today() + datetime.timedelta(days=1))
-                # смотрим, воскресенье это или нет
-                date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
-                date = get_date(date)
+                if datetime.datetime.today().isoweekday() != 7:
+                    # берем завтрашнюю дату
+                    date = (datetime.datetime.today() + datetime.timedelta(days=1))
+                    # смотрим, воскресенье это или нет
+                    date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
+                    date = get_date(date)
+                else:
+                    date = f'втоник, %s' % (datetime.datetime.today() + datetime.timedelta(days=2))
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
