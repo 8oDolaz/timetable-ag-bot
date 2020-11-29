@@ -141,7 +141,8 @@ def main():
                     date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
                     date = get_date(date)
                 else:
-                    date = f'втоник, %s' % (datetime.datetime.today() + datetime.timedelta(days=2))
+                    date = (datetime.datetime.today() + datetime.timedelta(days=2))
+                    date = get_date(date)
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
