@@ -117,14 +117,18 @@ def main():
 
                 day_info = get_all_info_day(cursor, date, user_stream)  # здесь мы получаем всю необходимую инфу
 
-                # здесь мы подготавливаем наш ответ
-                answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                try:
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                disconnect(connection, cursor)
+                    disconnect(connection, cursor)
 
-                bot.send_message(message.chat.id,
-                                 answer_today,
-                                 reply_markup=keyboard)  # отправляем сообщение
+                    bot.send_message(message.chat.id,
+                                     answer_tomorrow,
+                                     reply_markup=keyboard)
+                except IndexError:
+                    bot.send_message(message.chat.id,
+                                     'Сегодня нет уроков',
+                                     reply_markup=keyboard)
 
             elif message.text.lower() == 'завтра':
 
@@ -146,13 +150,18 @@ def main():
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
-                answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                try:
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                disconnect(connection, cursor)
+                    disconnect(connection, cursor)
 
-                bot.send_message(message.chat.id,
-                                 answer_tomorrow,
-                                 reply_markup=keyboard)
+                    bot.send_message(message.chat.id,
+                                     answer_tomorrow,
+                                     reply_markup=keyboard)
+                except IndexError:
+                    bot.send_message(message.chat.id,
+                                     'Сегодня нет уроков',
+                                     reply_markup=keyboard)
 
             elif message.text.lower() == 'на неделю':
 
@@ -168,13 +177,18 @@ def main():
                     if date.isoweekday() != 7:  # если день —— не воскресенье
                         date = get_date(date)
 
-                        day_info = get_all_info_day(cursor, date, user_stream)
+                        try:
+                            day_info = get_all_info_day(cursor, date, user_stream)
 
-                        answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                        bot.send_message(message.chat.id,
-                                         answer,
-                                         reply_markup=keyboard)
+                            bot.send_message(message.chat.id,
+                                             answer,
+                                             reply_markup=keyboard)
+                        except IndexError:
+                            bot.send_message(message.chat.id,
+                                             'Сегодня нет уроков',
+                                             reply_markup=keyboard)
 
                 disconnect(connection, cursor)
             elif message.text.lower() == 'сменить класс':  # до этого были команды, которые выводили расписание, но эта немного другая
