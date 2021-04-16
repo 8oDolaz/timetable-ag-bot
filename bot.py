@@ -18,7 +18,7 @@ def main():
         return config.days[day_in_week] + ', ' + date
 
     def delete_spaces(string):
-        # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
+        # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потом с конца
         # чтобы удалить все лишнее пробелы
         for i in range(len(string)):
             if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
@@ -136,7 +136,7 @@ def main():
                 cursor.execute('''
                 select c2 from user_info where c1=%s;
                 ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
+                user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться пользователь
 
                 if datetime.datetime.today().isoweekday() != 7:
                     # берем завтрашнюю дату
