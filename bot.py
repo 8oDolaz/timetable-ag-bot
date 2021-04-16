@@ -18,7 +18,7 @@ def main():
         return config.days[day_in_week] + ', ' + date
 
     def delete_spaces(string):
-        # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потом с конца
+        # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
         # чтобы удалить все лишнее пробелы
         for i in range(len(string)):
             if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
@@ -117,18 +117,14 @@ def main():
 
                 day_info = get_all_info_day(cursor, date, user_stream)  # здесь мы получаем всю необходимую инфу
 
-                try:
-                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1])
+                # здесь мы подготавливаем наш ответ
+                answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                    disconnect(connection, cursor)
+                disconnect(connection, cursor)
 
-                    bot.send_message(message.chat.id,
-                                     answer_tomorrow,
-                                     reply_markup=keyboard)
-                except IndexError:
-                    bot.send_message(message.chat.id,
-                                     'Сегодня нет уроков',
-                                     reply_markup=keyboard)
+                bot.send_message(message.chat.id,
+                                 answer_today,
+                                 reply_markup=keyboard)  # отправляем сообщение
 
             elif message.text.lower() == 'завтра':
 
@@ -136,7 +132,7 @@ def main():
                 cursor.execute('''
                 select c2 from user_info where c1=%s;
                 ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться пользователь
+                user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
 
                 if datetime.datetime.today().isoweekday() != 7:
                     # берем завтрашнюю дату
@@ -150,18 +146,13 @@ def main():
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
-                try:
-                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1])
+                answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                    disconnect(connection, cursor)
+                disconnect(connection, cursor)
 
-                    bot.send_message(message.chat.id,
-                                     answer_tomorrow,
-                                     reply_markup=keyboard)
-                except IndexError:
-                    bot.send_message(message.chat.id,
-                                     'Сегодня нет уроков',
-                                     reply_markup=keyboard)
+                bot.send_message(message.chat.id,
+                                 answer_tomorrow,
+                                 reply_markup=keyboard)
 
             elif message.text.lower() == 'на неделю':
 
@@ -177,18 +168,13 @@ def main():
                     if date.isoweekday() != 7:  # если день —— не воскресенье
                         date = get_date(date)
 
-                        try:
-                            day_info = get_all_info_day(cursor, date, user_stream)
+                        day_info = get_all_info_day(cursor, date, user_stream)
 
-                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1])
+                        answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
 
-                            bot.send_message(message.chat.id,
-                                             answer,
-                                             reply_markup=keyboard)
-                        except IndexError:
-                            bot.send_message(message.chat.id,
-                                             'Сегодня нет уроков',
-                                             reply_markup=keyboard)
+                        bot.send_message(message.chat.id,
+                                         answer,
+                                         reply_markup=keyboard)
 
                 disconnect(connection, cursor)
             elif message.text.lower() == 'сменить класс':  # до этого были команды, которые выводили расписание, но эта немного другая

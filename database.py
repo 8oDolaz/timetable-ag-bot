@@ -31,13 +31,13 @@ def database_update(data, stream):
             info = data[iteration].get(day)  # берем все, что будем записывать в базу данных
             for i in range(len(info[0])):
                 try:
-                    time, title = info[0][i], info[1][i]
+                    time, title, type = info[0][i], info[1][i], info[2][i]
                 except IndexError:
-                    time, title = info[0][i], info[1][i]
+                    time, title, type = info[0][i], info[1][i], 'Очно'
 
                 cursor.execute('''
-                insert into day_info(lesson_time, lesson_title, lesson_type, day, stream) values(%s, %s, %s, %s);
-                ''', (time, title, day, stream))
+                insert into day_info(lesson_time, lesson_title, lesson_type, day, stream) values(%s, %s, %s, %s, %s);
+                ''', (time, title, type, day, stream))
 
     disconnect(connection, cursor)
 
