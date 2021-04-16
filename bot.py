@@ -118,7 +118,7 @@ def main():
                 day_info = get_all_info_day(cursor, date, user_stream)  # здесь мы получаем всю необходимую инфу
 
                 try:
-                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1])
 
                     disconnect(connection, cursor)
 
@@ -151,7 +151,7 @@ def main():
                 day_info = get_all_info_day(cursor, date, user_stream)
 
                 try:
-                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1])
 
                     disconnect(connection, cursor)
 
@@ -180,7 +180,7 @@ def main():
                         try:
                             day_info = get_all_info_day(cursor, date, user_stream)
 
-                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1])
 
                             bot.send_message(message.chat.id,
                                              answer,
