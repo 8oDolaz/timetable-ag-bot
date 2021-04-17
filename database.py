@@ -23,19 +23,12 @@ def disconnect(connection, cursor):  # эта функция просто нас
 def database_update(data, stream):
     connection, cursor = connect_to_db()
 
-    for iteration in range(len(data)):
-        for day in data[iteration].keys():
-            '''наш iteration выглядит вот так ({ инфо. })
-            получается, что нам нужно брать первый объект словаря'''
+    for day in data.keys():
+        info = data.get(day)  # берем все, что будем записывать в базу данных
+        for i in range(len(info[0])):
+            time, title, type = info[0][i], info[1][i], info[2][i]
 
-            info = data[iteration].get(day)  # берем все, что будем записывать в базу данных
-            for i in range(len(info[0])):
-                try:
-                    time, title, type = info[0][i], info[1][i], info[2][i]
-                except IndexError:
-                    time, title, type = info[0][i], info[1][i], 'Очно'
-
-                cursor.execute('''
+            cursor.execute('''
                 insert into day_info(lesson_time, lesson_title, lesson_type, day, stream) values(%s, %s, %s, %s, %s);
                 ''', (time, title, type, day, stream))
 
@@ -49,6 +42,6 @@ disconnect(connection, cursor)
 with open('streams_info.json', 'r') as db:
     streams = json.load(db)
 
-for key in streams.keys():
+for key_i, key in enumerate(streams.keys()):
     stream = streams.get(key)
     database_update(parse_timetable(stream), stream)

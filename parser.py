@@ -1,12 +1,24 @@
 import datetime
 import requests
+
 from bs4 import BeautifulSoup
 
 
-def lesson_type(string):
-    if string.lower().count('дист') != 0:
-        return 'Дист.'
-    return 'Очно'
+def delete_spaces(string):
+    # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
+    # чтобы удалить все лишнее пробелы
+    useful = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя,:1234567890'
+    for i in range(len(string)):
+        if string[i].lower() in useful:
+            string = string[i:]
+            break
+
+    for i in reversed(range(len(string))):
+        if string[i].lower() in useful:
+            string = string[:i + 1]
+            break
+
+    return string
 
 
 def parse_timetable(stream):
@@ -22,31 +34,31 @@ def parse_timetable(stream):
     # all info except first and second (some useless info in it)
     all_info = soup.find_all('div', {'class': 'panel panel-default'})[2:]
 
-    all_data = []  # empty array for all information
+    output = {}
 
-    for item in all_info:  # go in all info
-        title_m, time_m, type_m = [], [], []  # empty arrays for time and subject
+    for day in all_info:
+        time_array, title_array = [], []
+        date = day.find('h4', {'class': 'panel-title'})
+        date = date.text.replace(' ', '', 20).replace('\n', '').replace('\r', '')
+        date = delete_spaces(date)
 
-        # prepare data (a lot of useless symbols)
-        date = item.find('h4', {'class': 'panel-title'}).text.replace(' ', '', 20).replace('\n', '').replace('\r', '')
-        # replacing spaces after text
-        date = date[::-1].replace(' ', '', 16)[::-1]  # today's date
+        for row in day.find_all('li', {'class': 'common-list-item row'}):
+            for item in row.find_all('span'):
+                if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0:
 
-        for title_iter in item.find_all('span', {'class': 'moreinfo', 'title': 'Время'}):
-            time = title_iter.text.replace(' ', '').replace('\n', '').replace('\r', '')
-            time_m.append(time)  # find and add all lessons timing
+                    if str(item).lower().count('время') != 0:
+                        time = item.text.replace('\n', '').replace('\r', '')
+                        time_array.append(
+                            delete_spaces(time)
+                        )
 
-        for title_iter in item.find_all('span', {'class': 'moreinfo', 'title': 'Предмет'}):
-            title = title_iter.text.replace(' ', '', 15).replace('\n', '').replace('\r', '')
-            title = title[:(title.find(','))]
-            title_m.append(title)  # find and add all lessons title
+                    if str(item).lower().count('предмет') != 0:
+                        title = item.text.replace('\n', '').replace('\r', '')
+                        title = title[:title.find(',')]
+                        title_array.append(
+                            delete_spaces(title)
+                        )
 
-        types = item.find_all('div', {'class': 'col-sm-3 studyevent-locations'})
-        for place in types:
-            type = place.find_all('span')
-            for iter in type:
-                type_m.append(lesson_type(iter.text))
+        output[date] = [time_array, title_array, ['Очно' for _ in range(len(time_array))]]
 
-        all_data.append({date: [time_m, title_m, type_m]})  # add everything to the array
-
-    return all_data
+    return output
