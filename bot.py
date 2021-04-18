@@ -21,8 +21,8 @@ def main():
 
     def get_all_info_day(cursor, day, stream):  # это функция возвращает все что нужно для формирования сообщения
         cursor.execute('''
-        select * from day_info where
-        (position(%s in day_info.day) > 0 and day_info.stream=%s)
+        SELECT * FROM day_info WHERE
+        (position(%s IN day_info.day) > 0 AND day_info.stream=%s)
         ''', (day, stream,))
 
         time, title, _day, type = [], [], [], []
@@ -83,7 +83,7 @@ def main():
                 date = get_date(date)  # эта функция возвращает все нужное
 
                 cursor.execute('''
-                select c2 from user_info where c1=%s;
+                SELECT c2 FROM user_info WHERE c1=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
@@ -102,7 +102,7 @@ def main():
 
                 connection, cursor = connect_to_db()
                 cursor.execute('''
-                select c2 from user_info where c1=%s;
+                SELECT c2 FROM user_info WHERE c1=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
 
@@ -131,7 +131,7 @@ def main():
                 connection, cursor = connect_to_db()
 
                 cursor.execute('''
-                select c2 from user_info where c1=%s;
+                SELECT c2 FROM user_info WHERE c1=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
