@@ -1,23 +1,7 @@
 from parser import parse_timetable
+from functions import connect_to_db, disconnect
+
 import json
-import psycopg2 as ps2
-
-
-def connect_to_db():  # это функция подключает нас к базе данных
-    connection = ps2.connect(  # сюда мы передаем всё необходимое
-        host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
-        database='deocs7tolmvlhl',
-        user='kvrovbpxebvygf',
-        port=5432,
-        password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
-    )
-    return connection, connection.cursor()
-
-
-def disconnect(connection, cursor):  # эта функция просто нас отключает
-    connection.commit()
-    cursor.close()
-    connection.close()
 
 
 def database_update(data, stream):
@@ -42,6 +26,8 @@ disconnect(connection, cursor)
 with open('streams_info.json', 'r') as db:
     streams = json.load(db)
 
-for key_i, key in enumerate(streams.keys()):
+all_classes = streams.keys()
+for key_i, key in enumerate(all_classes):
+    print(f'{key_i}/{len(all_classes)}', streams.get(key))
     stream = streams.get(key)
     database_update(parse_timetable(stream), stream)

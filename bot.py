@@ -1,8 +1,9 @@
+from functions import delete_spaces, connect_to_db, disconnect
+
 import telebot
 import json
 import config
 import datetime
-import psycopg2 as ps2
 
 
 def main():
@@ -17,35 +18,6 @@ def main():
         # получаем финальное название дня
         return config.days[day_in_week] + ', ' + date
 
-    def delete_spaces(string):
-        # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
-        # чтобы удалить все лишнее пробелы
-        for i in range(len(string)):
-            if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
-                string = string[i:]
-                break
-
-        for i in reversed(range(len(string))):
-            if string[i].lower() in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя':
-                string = string[:i + 1]
-                break
-
-        return string
-
-    def connect_to_db():  # это функция подключает нас к базе данных
-        connection = ps2.connect(  # сюда мы передаем всё необходимое
-            host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
-            database='deocs7tolmvlhl',
-            user='kvrovbpxebvygf',
-            port=5432,
-            password='2a9a8d39986ac9095ec905091708ba357a0df483caa195141ca5ae53bafc3628',
-        )
-        return connection, connection.cursor()
-
-    def disconnect(connection, cursor):  # эта функция просто нас отключает
-        connection.commit()
-        cursor.close()
-        connection.close()
 
     def get_all_info_day(cursor, day, stream):  # это функция возвращает все что нужно для формирования сообщения
         cursor.execute('''

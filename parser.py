@@ -1,24 +1,9 @@
+from functions import delete_spaces
+
 import datetime
 import requests
 
 from bs4 import BeautifulSoup
-
-
-def delete_spaces(string):
-    # я не буду писать комментарий к каждой строке, но здесь мы сначала ищем первую букву с начала, а потмо с конца
-    # чтобы удалить все лишнее пробелы
-    useful = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя,:1234567890'
-    for i in range(len(string)):
-        if string[i].lower() in useful:
-            string = string[i:]
-            break
-
-    for i in reversed(range(len(string))):
-        if string[i].lower() in useful:
-            string = string[:i + 1]
-            break
-
-    return string
 
 
 def parse_timetable(stream):
@@ -59,6 +44,10 @@ def parse_timetable(stream):
                             delete_spaces(title)
                         )
 
-        output[date] = [time_array, title_array, ['Очно' for _ in range(len(time_array))]]
+        output[date] = [
+            time_array,
+            title_array,
+            ['Очно' for _ in range(len(time_array))]
+        ]
 
     return output
