@@ -149,7 +149,7 @@ def main():
                                          reply_markup=keyboard)
 
                 disconnect(connection, cursor)
-            elif message.text.lower() == 'сменить класс':  # до этого были команды, которые выводили расписание, но эта немного другая
+            elif message.text.lower() == 'сменить класс':
                 connection, cursor = connect_to_db()
                 cursor.execute('''DELETE FROM USER_INFO WHERE c1=%s;''',
                                (message.chat.id,))  # delete this user from db

@@ -28,6 +28,5 @@ with open('streams_info.json', 'r') as db:
 
 all_classes = streams.keys()
 for key_i, key in enumerate(all_classes):
-    print(f'{key_i}/{len(all_classes)}', streams.get(key))
     stream = streams.get(key)
     database_update(parse_timetable(stream), stream)
