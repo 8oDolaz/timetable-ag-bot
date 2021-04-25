@@ -51,6 +51,3 @@ def parse_timetable(stream):
         ]
 
     return output
-
-
-print(parse_timetable(275100))
