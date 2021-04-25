@@ -6,6 +6,14 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def check_if_time(element):
+    numbers = '1234567890'
+
+    element = delete_spaces(element)
+    for letter in element:
+        if letter in numbers: return True
+    return False
+
 def parse_timetable(stream):
     now = datetime.datetime.now()  # today's date
     now = now.strftime('%Y-%m-%d')  # example: 2020-09-09
@@ -31,13 +39,13 @@ def parse_timetable(stream):
             for item in row.find_all('span'):
                 if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0:
 
-                    if str(item).lower().count(':') != 0:  # время урока
+                    if check_if_time(item.text):  # время урока
                         time = item.text.replace('\n', '').replace('\r', '')
                         time_array.append(
                             delete_spaces(time)
                         )
 
-                    if str(item).lower().count(':') == 0:  # название предмета
+                    if not check_if_time(item.text):  # название предмета
                         title = item.text.replace('\n', '').replace('\r', '')
                         title = title[:title.find(',')]
                         title_array.append(
