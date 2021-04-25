@@ -31,13 +31,13 @@ def parse_timetable(stream):
             for item in row.find_all('span'):
                 if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0:
 
-                    if str(item).lower().count('время') != 0:
+                    if str(item).lower().count(':') != 0:  # время урока
                         time = item.text.replace('\n', '').replace('\r', '')
                         time_array.append(
                             delete_spaces(time)
                         )
 
-                    if str(item).lower().count('предмет') != 0:
+                    if str(item).lower().count(':') == 0:  # название предмета
                         title = item.text.replace('\n', '').replace('\r', '')
                         title = title[:title.find(',')]
                         title_array.append(
@@ -51,3 +51,6 @@ def parse_timetable(stream):
         ]
 
     return output
+
+
+print(parse_timetable(275100))
