@@ -163,7 +163,7 @@ def main():
         else:
             # если у нас нет такого пользователя
             with open('streams_info.json', 'r') as file:
-                stream = (json.load(file)).get(message.text.lower())  # json.load(file) возвращает нам словарь
+                stream = (json.load(file)).get(message.text.lower())
                 file.close()
 
             if stream is not None:  # если такой поток существует

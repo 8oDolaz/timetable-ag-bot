@@ -37,7 +37,8 @@ def parse_timetable(stream):
 
         for row in day.find_all('li', {'class': 'common-list-item row'}):
             for item in row.find_all('span'):
-                if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0:
+                if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0\
+                        and str(item).count('hoverable') == 0:
 
                     if check_if_time(item.text):  # время урока
                         time = item.text.replace('\n', '').replace('\r', '')
