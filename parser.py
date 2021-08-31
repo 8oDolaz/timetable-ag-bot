@@ -25,7 +25,7 @@ def parse_timetable(stream):
 
     soup = BeautifulSoup(request.text, features='lxml')  # init Beautiful soup
     # all info except first and second (some useless info in it)
-    all_info = soup.find_all('div', {'class': 'panel panel-default'})[2:]
+    all_info = soup.find_all('div', {'class': 'panel panel-default'})[3:]
 
     output = {}
 
@@ -60,3 +60,5 @@ def parse_timetable(stream):
         ]
 
     return output
+
+print(parse_timetable('303252'))

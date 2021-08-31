@@ -37,13 +37,12 @@ def main():
         return time, title, _day, type
 
     def prepare_answer(day, time, title, place, s=''):  # здесь мы формируем само сообщение
-        # day[0].upper() —— теперь первая буква заглавная!
         s += day[0].upper() + day[1:] + '\n'
         for item in range(len(time)):
             # Я не знаю где эта проблема, но пробелы я должен удалять здесь
-            s += time[item].replace(' ', '') + ' ' + delete_spaces(
-                title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
-            # Возможно, когда-то, я добавлю Очно или Дистанционо
+             s += time[item].replace(' ', '') + ' ' + delete_spaces(
+                 title[item]) + '\n'  # ' '+ '('+delete_spaces(place[item])+')' + '\n'
+                # Возможно, когда-то, я добавлю Очно или Дистанционо
         return s
 
     bot = telebot.TeleBot(config.token)  # бот с нашим токеном
@@ -90,7 +89,11 @@ def main():
                 day_info = get_all_info_day(cursor, date, user_stream)  # здесь мы получаем всю необходимую инфу
 
                 # здесь мы подготавливаем наш ответ
-                answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+
+                try:
+                    answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                except IndexError:
+                    answer_today = 'Уроков нет!'
 
                 disconnect(connection, cursor)
 
@@ -118,7 +121,10 @@ def main():
 
                 day_info = get_all_info_day(cursor, date, user_stream)
 
-                answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                try:
+                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                except IndexError:
+                    answer_tomorrow = 'Уроков нет!'
 
                 disconnect(connection, cursor)
 
@@ -142,7 +148,10 @@ def main():
 
                         day_info = get_all_info_day(cursor, date, user_stream)
 
-                        answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                        try:
+                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
+                        except IndexError:
+                            answer = 'Уроков нет!'
 
                         bot.send_message(message.chat.id,
                                          answer,

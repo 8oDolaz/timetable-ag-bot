@@ -1,6 +1,6 @@
 import telebot
 
-# token = '1483091692:AAF8LHuy-vk7DnELz8GI3U-CJVEtjNh6qa0'  # тестовый бот
+№ token = '1483091692:AAF8LHuy-vk7DnELz8GI3U-CJVEtjNh6qa0'  # тестовый бот
 token = '1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M'  # основной бот
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup()  # создаем клавиатуру
