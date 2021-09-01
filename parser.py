@@ -7,15 +7,13 @@ from bs4 import BeautifulSoup
 
 
 def check_if_time(element):
-    numbers = '1234567890'
-
     element = delete_spaces(element)
     for letter in element:
-        if letter in numbers: return True
+        if letter.isdigit(): return True
     return False
 
 def parse_timetable(stream):
-    now = datetime.datetime.now()  # today's date
+    now = datetime.datetime.now()# today's date
     now = now.strftime('%Y-%m-%d')  # example: 2020-09-09
 
     # website link for actual day
