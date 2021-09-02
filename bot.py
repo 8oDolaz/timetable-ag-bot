@@ -63,6 +63,11 @@ def main():
 
         disconnect(connection, cursor)  # а так мы будем отключаться от нее
 
+    @bot.message_handler(func=lambda message: True, commands=['info'])  # стартовая комманда бота
+    def info(message):
+        bot.send_message(message.chat.id,
+                         config.info)
+
     # основная функция бота, показывающая расписание
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # все наши команды выводят текст
     def main_bot(message):
