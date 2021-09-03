@@ -225,7 +225,7 @@ def main():
             # если у нас нет такого пользователя
             with open('streams_info.json', 'r') as file:
                 stream = message.text.lower()
-                if not stream[len(stream) - 1].isdigit():
+                if not stream[-1].isdigit():
                     stream += '1'
 
                 stream = (json.load(file)).get(stream)

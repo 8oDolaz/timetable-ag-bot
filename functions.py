@@ -1,21 +1,6 @@
 import psycopg2 as ps2
 
-
-def delete_spaces(string):
-    # первый делом проходимся с начала строки в конец, затем с конца в начало
-    # так мы оставляем только текст, удаляя все пробелы
-    useful = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя,:1234567890'
-    for i in range(len(string)):
-        if string[i].lower() in useful:
-            string = string[i:]
-            break
-
-    for i in reversed(range(len(string))):
-        if string[i].lower() in useful:
-            string = string[:i + 1]
-            break
-
-    return string
+delete_spaces = lambda string: string.strip()
 
 
 def connect_to_db():  # это функция подключает нас к базе данных
