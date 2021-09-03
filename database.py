@@ -19,14 +19,19 @@ def database_update(data, stream):
     disconnect(connection, cursor)
 
 
-connection, cursor = connect_to_db()
-cursor.execute('TRUNCATE TABLE day_info;')
-disconnect(connection, cursor)
+def main():
+    connection, cursor = connect_to_db()
+    cursor.execute('TRUNCATE TABLE day_info;')
+    disconnect(connection, cursor)
 
-with open('streams_info.json', 'r') as db:
-    streams = json.load(db)
+    with open('streams_info.json', 'r') as db:
+        streams = json.load(db)
 
-all_classes = streams.keys()
-for key_i, key in enumerate(all_classes):
-    stream = streams.get(key)
-    database_update(parse_timetable(stream), stream)
+    all_classes = streams.keys()
+    for key_i, key in enumerate(all_classes):
+        stream = streams.get(key)
+        database_update(parse_timetable(stream), stream)
+
+
+if __name__ == '__main__':
+    main()
