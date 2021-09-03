@@ -1,7 +1,5 @@
 import psycopg2 as ps2
 
-delete_spaces = lambda string: string.strip()
-
 
 def connect_to_db():  # это функция подключает нас к базе данных
     connection = ps2.connect(  # сюда мы передаем всё необходимое

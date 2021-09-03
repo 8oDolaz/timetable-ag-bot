@@ -1,4 +1,4 @@
-from functions import delete_spaces, connect_to_db, disconnect
+from functions import connect_to_db, disconnect
 
 import telebot
 import json
@@ -73,8 +73,7 @@ def prepare_answer(day, time, title, place):  # здесь мы формируе
 
     ans = day.capitalize() + '\n'
     for item in range(len(time)):
-        # Я не знаю где эта проблема, но пробелы я должен удалять здесь
-        ans += time[item].replace(' ', '') + ' ' + delete_spaces(title[item]) + '\n'
+        ans += time[item].replace(' ', '') + ' ' + title[item].strip() + '\n'
     return ans
 
 
