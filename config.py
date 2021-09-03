@@ -1,15 +1,16 @@
-import telebot
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
 # token = '1483091692:AAF8LHuy-vk7DnELz8GI3U-CJVEtjNh6qa0'  # тестовый бот
 token = '1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M'  # основной бот
 
-main_keyboard = telebot.types.ReplyKeyboardMarkup()  # создаем клавиатуру
-button1 = telebot.types.KeyboardButton('Сегодня')
-button2 = telebot.types.KeyboardButton('Завтра')
-button3 = telebot.types.KeyboardButton('На неделю')
-button4 = telebot.types.KeyboardButton('Сменить класс')
-main_keyboard.row(button1, button2, button3)  # добавляем
-main_keyboard.row(button4)
+main_keyboard = ReplyKeyboardMarkup()  # создаем клавиатуру
+main_keyboard.row(
+        KeyboardButton('Сегодня'),
+        KeyboardButton('Завтра'),
+        KeyboardButton('На неделю'))  # добавляем
+main_keyboard.row(
+        KeyboardButton('Сменить класс'),
+)
 
 instruction = '''Пожалуйста, введите свой класс, чтобы воспользоваться ботом и посмотреть ваше расписание!
 Вот примеры: 10и1, 8к2, 9м1, где:
