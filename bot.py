@@ -81,12 +81,15 @@ def prepare_answer(day, time, title, place):  # здесь мы формируе
 def main():
     bot = telebot.TeleBot(config.token)
 
-    keyboard = config.keyboard1
+    keyboard = config.main_keyboard
     # заранее созданная клавиатура
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
     # стартовая команда бота
     def start(message):
+        # здесь, как и в дальнейшем,
+        # message -- объект, который содержит всю информацию о сообщении и чате
+
         connection, cursor = connect_to_db()
         # подключение к базе данных
 
@@ -124,21 +127,21 @@ def main():
                 date = datetime.datetime.today()
                 # смотрим, воскресенье это или нет
                 date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
-                date = get_date(date)  # эта функция возвращает все нужное
+                date_for_db = get_date(date)  # эта функция возвращает все нужное
 
                 cursor.execute('''
                 SELECT c2 FROM user_info WHERE c1=%s;
                 ''', (message.chat.id,))
                 user_stream = cursor.fetchall()[0][0]
 
-                day_info = get_all_info_day(cursor, date, user_stream)  # здесь мы получаем всю необходимую инфу
+                day_info = get_all_info_day(cursor, date_for_db, user_stream)  # здесь мы получаем всю необходимую инфу
 
-                # здесь мы подготавливаем наш ответ
-
+                # подгатавливаем наш ответ
                 try:
                     answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
                 except IndexError:
-                    answer_today = 'Уроков нет!'
+                    answer_today = date_for_db.capitalize() +' '+ config.months[date.month - 1] +'\n'
+                    answer_today += 'Уроков нет!'
 
                 disconnect(connection, cursor)
 
@@ -155,21 +158,24 @@ def main():
                 user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
 
                 if datetime.datetime.today().isoweekday() != 7:
+                    # если день недели не воскресенье
+
                     # берем завтрашнюю дату
                     date = (datetime.datetime.today() + datetime.timedelta(days=1))
                     # смотрим, воскресенье это или нет
                     date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
-                    date = get_date(date)
+                    date_for_db = get_date(date)
                 else:
                     date = (datetime.datetime.today() + datetime.timedelta(days=2))
-                    date = get_date(date)
+                    date_for_db = get_date(date)
 
-                day_info = get_all_info_day(cursor, date, user_stream)
+                day_info = get_all_info_day(cursor, date_for_db, user_stream)
 
                 try:
                     answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
                 except IndexError:
-                    answer_tomorrow = 'Уроков нет!'
+                    answer_tomorrow = date_for_db.capitalize() + ' ' + config.months[date.month - 1] +'\n'
+                    answer_tomorrow += 'Уроков нет!'
 
                 disconnect(connection, cursor)
 
@@ -189,14 +195,15 @@ def main():
                 for delta in range(0, 7):  # здесь мы пускаем цикл как-бы по дням недели
                     date = (datetime.datetime.today() + datetime.timedelta(days=delta))
                     if date.isoweekday() != 7:  # если день —— не воскресенье
-                        date = get_date(date)
+                        date_for_db = get_date(date)
 
-                        day_info = get_all_info_day(cursor, date, user_stream)
+                        day_info = get_all_info_day(cursor, date_for_db, user_stream)
 
                         try:
                             answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
                         except IndexError:
-                            answer = 'Уроков нет!'
+                            answer = date_for_db.capitalize() + ' ' + config.months[date.month - 1] +'\n'
+                            answer += 'Уроков нет!'
 
                         bot.send_message(message.chat.id,
                                          answer,
@@ -237,6 +244,7 @@ def main():
                                  config.instruction)
 
     bot.polling(none_stop=True)
+    # запускаем бота
 
 
 if __name__ == '__main__':
