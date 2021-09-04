@@ -53,10 +53,8 @@ def parse_timetable(stream):
         output[date] = [
             time_array,
             title_array,
-            ['Очно' for _ in range(len(time_array))]
+            ['Очно'] * len(time_array),
         ]
 
     return output
 
-
-print(parse_timetable('303252'))

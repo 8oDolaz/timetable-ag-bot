@@ -1,4 +1,4 @@
-from functions import connect_to_db, disconnect
+from database import connect_to_db, disconnect
 
 import telebot
 import json
