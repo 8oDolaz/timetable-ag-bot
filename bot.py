@@ -5,6 +5,7 @@ import json
 import config
 import datetime
 
+
 # Таблицы в базе данных
 
 # таблица day_info
@@ -60,20 +61,27 @@ def get_all_info_day(cursor, day, stream):
     return time, title, _day, type
 
 
-def prepare_answer(day, time, title, place):  # здесь мы формируем само сообщение
-    # day -- "вторник, 1 сентября" строка
-    # time -- "10:00-14:00" массив строк
-    # title -- "Алгебра" массив строк
-    # place -- Очно/Дистанционно строка
+def prepare_answer(info, date):
+    #
 
     # возвращает сообщение для одного дня строкой
     # Вторник, 1 сентября
     # 10:00-14:00 Алгебра
     # ...
 
-    ans = day.capitalize() + '\n'
-    for item in range(len(time)):
-        ans += time[item].replace(' ', '') + ' ' + title[item].strip() + '\n'
+    date_str = get_date(date).strip().capitalize()
+    if len(info[2]) != 0:
+        day = info[2][0].strip().capitalize()
+        time = info[0]
+        title = info[1]
+
+        ans = day + '\n'
+        for item in range(len(time)):
+            ans += time[item].strip() + ' ' + title[item].strip() + '\n'
+    else:
+        ans = date_str + ' ' + config.months[date.month - 1] + '\n'
+        ans += 'Уроков нет!'
+
     return ans
 
 
@@ -81,6 +89,7 @@ def main():
     bot = telebot.TeleBot(config.token)
 
     keyboard = config.main_keyboard
+
     # заранее созданная клавиатура
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
@@ -119,101 +128,58 @@ def main():
 
         if len(cursor.fetchall()) != 0:
             # такой пользователь уже существует
+            cursor.execute('''
+            SELECT c2 FROM user_info WHERE c1=%s;
+            ''', (message.chat.id,))
+            user_stream = cursor.fetchall()[0][0]
 
-            if message.text.lower() == 'сегодня':
-                # так будем обрабатывать сообщения пользователя
-
+            if message.text.lower() in ['сегодня', 'завтра']:
                 date = datetime.datetime.today()
-                # смотрим, воскресенье это или нет
-                date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
-                date_for_db = get_date(date)  # эта функция возвращает все нужное
 
-                cursor.execute('''
-                SELECT c2 FROM user_info WHERE c1=%s;
-                ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]
-
-                day_info = get_all_info_day(cursor, date_for_db, user_stream)  # здесь мы получаем всю необходимую инфу
-
-                # подгатавливаем наш ответ
-                try:
-                    answer_today = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
-                except IndexError:
-                    answer_today = date_for_db.capitalize() +' '+ config.months[date.month - 1] +'\n'
-                    answer_today += 'Уроков нет!'
-
-                disconnect(connection, cursor)
-
-                bot.send_message(message.chat.id,
-                                 answer_today,
-                                 reply_markup=keyboard)  # отправляем сообщение
-
-            elif message.text.lower() == 'завтра':
-
-                connection, cursor = connect_to_db()
-                cursor.execute('''
-                SELECT c2 FROM user_info WHERE c1=%s;
-                ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]  # так мы получаем поток на котором учиться польщователь
-
-                if datetime.datetime.today().isoweekday() != 7:
-                    # если день недели не воскресенье
-
-                    # берем завтрашнюю дату
-                    date = (datetime.datetime.today() + datetime.timedelta(days=1))
-                    # смотрим, воскресенье это или нет
-                    date = (date + datetime.timedelta(days=1)) if date.isoweekday() == 7 else date
+                if message.text.lower() == 'сегодня':
                     date_for_db = get_date(date)
-                else:
-                    date = (datetime.datetime.today() + datetime.timedelta(days=2))
+                    # эта функция возвращает все нужное
+
+                    day_info = get_all_info_day(cursor, date_for_db, user_stream)
+                    # здесь мы получаем всю необходимую инфу
+
+                    # подгатавливаем наш ответ
+                    answer_today = prepare_answer(day_info, date)
+
+                    bot.send_message(message.chat.id,
+                                     answer_today,
+                                     reply_markup=keyboard)  # отправляем сообщение
+
+                elif message.text.lower() == 'завтра':
+
+                    date = date + datetime.timedelta(days=1)
                     date_for_db = get_date(date)
 
-                day_info = get_all_info_day(cursor, date_for_db, user_stream)
+                    day_info = get_all_info_day(cursor, date_for_db, user_stream)
 
-                try:
-                    answer_tomorrow = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
-                except IndexError:
-                    answer_tomorrow = date_for_db.capitalize() + ' ' + config.months[date.month - 1] +'\n'
-                    answer_tomorrow += 'Уроков нет!'
+                    answer_tomorrow = prepare_answer(day_info, date)
 
-                disconnect(connection, cursor)
-
-                bot.send_message(message.chat.id,
-                                 answer_tomorrow,
-                                 reply_markup=keyboard)
+                    bot.send_message(message.chat.id,
+                                     answer_tomorrow,
+                                     reply_markup=keyboard)
 
             elif message.text.lower() == 'на неделю':
-
-                connection, cursor = connect_to_db()
-
-                cursor.execute('''
-                SELECT c2 FROM user_info WHERE c1=%s;
-                ''', (message.chat.id,))
-                user_stream = cursor.fetchall()[0][0]
-
-                for delta in range(0, 7):  # здесь мы пускаем цикл как-бы по дням недели
+                for delta in range(7):  # здесь мы пускаем цикл как-бы по дням недели
                     date = (datetime.datetime.today() + datetime.timedelta(days=delta))
-                    if date.isoweekday() != 7:  # если день —— не воскресенье
-                        date_for_db = get_date(date)
+                    date_for_db = get_date(date)
 
-                        day_info = get_all_info_day(cursor, date_for_db, user_stream)
+                    day_info = get_all_info_day(cursor, date_for_db, user_stream)
 
-                        try:
-                            answer = prepare_answer(day_info[2][0], day_info[0], day_info[1], day_info[3])
-                        except IndexError:
-                            answer = date_for_db.capitalize() + ' ' + config.months[date.month - 1] +'\n'
-                            answer += 'Уроков нет!'
+                    answer = prepare_answer(day_info, date)
 
-                        bot.send_message(message.chat.id,
-                                         answer,
-                                         reply_markup=keyboard)
+                    bot.send_message(message.chat.id,
+                                     answer,
+                                     reply_markup=keyboard)
 
-                disconnect(connection, cursor)
             elif message.text.lower() == 'сменить класс':
-                connection, cursor = connect_to_db()
                 cursor.execute('''DELETE FROM USER_INFO WHERE c1=%s;''',
                                (message.chat.id,))  # delete this user from db
-                disconnect(connection, cursor)
+
                 bot.send_message(message.chat.id,
                                  config.instruction)
             else:  # если пользователь не выбрал предложенные функции
@@ -234,13 +200,14 @@ def main():
                 cursor.execute('INSERT INTO USER_INFO(c1, c2) VALUES(%s, %s);',
                                (message.chat.id, stream,))
 
-                disconnect(connection, cursor)
                 bot.send_message(message.chat.id,
                                  config.text_after_change,
                                  reply_markup=keyboard)
             else:  # если пользователь ввел поток неправильно
                 bot.send_message(message.chat.id,
                                  config.instruction)
+
+        disconnect(connection, cursor)
 
     bot.polling(none_stop=True)
     # запускаем бота
