@@ -89,7 +89,6 @@ def main():
     bot = telebot.TeleBot(config.token)
 
     keyboard = config.main_keyboard
-
     # заранее созданная клавиатура
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
@@ -123,14 +122,28 @@ def main():
     # основная функция бота, показывающая расписание
     @bot.message_handler(func=lambda message: True, content_types=['text'])  # все наши команды выводят текст
     def main_bot(message):
+        user_id = message.chat.id
+
         connection, cursor = connect_to_db()
-        cursor.execute('SELECT USER_INFO FROM USER_INFO WHERE c1=%s;', (message.chat.id,))
+        cursor.execute('SELECT USER_INFO FROM USER_INFO WHERE c1=%s;', (user_id,))
 
         if len(cursor.fetchall()) != 0:
             # такой пользователь уже существует
+            date = datetime.datetime.now()
+            date = date.strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute('''
+            INSERT INTO latest_message (telegram_id, message_date)
+                VALUES (%s::INT, %s::timestamp)
+            ON CONFLICT (telegram_id) DO
+                UPDATE SET message_date = %s::timestamp;
+
             SELECT c2 FROM user_info WHERE c1=%s;
-            ''', (message.chat.id,))
+            ''', (
+                user_id,
+                date,
+                date,
+                user_id,
+            ))
             user_stream = cursor.fetchall()[0][0]
 
             if message.text.lower() in ['сегодня', 'завтра']:
@@ -138,17 +151,14 @@ def main():
 
                 if message.text.lower() == 'сегодня':
                     date_for_db = get_date(date)
-                    # эта функция возвращает все нужное
 
                     day_info = get_all_info_day(cursor, date_for_db, user_stream)
-                    # здесь мы получаем всю необходимую инфу
 
-                    # подгатавливаем наш ответ
                     answer_today = prepare_answer(day_info, date)
 
-                    bot.send_message(message.chat.id,
+                    bot.send_message(user_id,
                                      answer_today,
-                                     reply_markup=keyboard)  # отправляем сообщение
+                                     reply_markup=keyboard)
 
                 elif message.text.lower() == 'завтра':
 
@@ -159,12 +169,12 @@ def main():
 
                     answer_tomorrow = prepare_answer(day_info, date)
 
-                    bot.send_message(message.chat.id,
+                    bot.send_message(user_id,
                                      answer_tomorrow,
                                      reply_markup=keyboard)
 
             elif message.text.lower() == 'на неделю':
-                for delta in range(7):  # здесь мы пускаем цикл как-бы по дням недели
+                for delta in range(7):
                     date = (datetime.datetime.today() + datetime.timedelta(days=delta))
                     date_for_db = get_date(date)
 
@@ -172,22 +182,21 @@ def main():
 
                     answer = prepare_answer(day_info, date)
 
-                    bot.send_message(message.chat.id,
+                    bot.send_message(user_id,
                                      answer,
                                      reply_markup=keyboard)
 
             elif message.text.lower() == 'сменить класс':
                 cursor.execute('''DELETE FROM USER_INFO WHERE c1=%s;''',
-                               (message.chat.id,))  # delete this user from db
+                               (user_id,))
 
-                bot.send_message(message.chat.id,
+                bot.send_message(user_id,
                                  config.instruction)
-            else:  # если пользователь не выбрал предложенные функции
-                bot.send_message(message.chat.id,
+            else:
+                bot.send_message(user_id,
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard)
         else:
-            # если у нас нет такого пользователя
             with open('streams_info.json', 'r') as file:
                 stream = message.text.lower()
                 if not stream[-1].isdigit():
@@ -196,21 +205,20 @@ def main():
                 stream = (json.load(file)).get(stream)
                 file.close()
 
-            if stream is not None:  # если такой поток существует
+            if stream is not None:
                 cursor.execute('INSERT INTO USER_INFO(c1, c2) VALUES(%s, %s);',
-                               (message.chat.id, stream,))
+                               (user_id, stream,))
 
-                bot.send_message(message.chat.id,
+                bot.send_message(user_id,
                                  config.text_after_change,
                                  reply_markup=keyboard)
-            else:  # если пользователь ввел поток неправильно
-                bot.send_message(message.chat.id,
+            else:
+                bot.send_message(user_id,
                                  config.instruction)
 
         disconnect(connection, cursor)
 
     bot.polling(none_stop=True)
-    # запускаем бота
 
 
 if __name__ == '__main__':

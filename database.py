@@ -4,9 +4,8 @@ import json
 import psycopg2 as ps2
 
 
-
-def connect_to_db():  # это функция подключает нас к базе данных
-    connection = ps2.connect(  # сюда мы передаем всё необходимое
+def connect_to_db():
+    connection = ps2.connect(
         host='ec2-54-217-224-85.eu-west-1.compute.amazonaws.com',
         database='deocs7tolmvlhl',
         user='kvrovbpxebvygf',
@@ -16,7 +15,7 @@ def connect_to_db():  # это функция подключает нас к б�
     return connection, connection.cursor()
 
 
-def disconnect(connection, cursor):  # эта функция просто нас отключает
+def disconnect(connection, cursor):
     connection.commit()
     cursor.close()
     connection.close()
@@ -26,7 +25,7 @@ def database_update(data, stream):
     connection, cursor = connect_to_db()
 
     for day in data.keys():
-        info = data.get(day)  # берем все, что будем записывать в базу данных
+        info = data.get(day)
         for i in range(len(info[0])):
             time, title, type = info[0][i], info[1][i], info[2][i]
 
