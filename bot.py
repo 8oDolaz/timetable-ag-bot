@@ -133,7 +133,7 @@ def main():
             date = date.strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute('''
             INSERT INTO latest_message (telegram_id, message_date)
-                VALUES (%s::INT, %s::timestamp)
+                VALUES (%s::int, %s::timestamp)
             ON CONFLICT (telegram_id) DO
                 UPDATE SET message_date = %s::timestamp;
 

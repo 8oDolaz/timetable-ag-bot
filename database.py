@@ -21,25 +21,23 @@ def disconnect(connection, cursor):
     connection.close()
 
 
-def database_update(data, stream):
-    connection, cursor = connect_to_db()
-
+def database_update(data, stream, connection, cursor):
     for day in data.keys():
         info = data.get(day)
         for i in range(len(info[0])):
             time, title, type = info[0][i], info[1][i], info[2][i]
 
             cursor.execute('''
-                INSERT INTO day_info(lesson_time, lesson_title, lesson_type, day, stream) VALUES(%s, %s, %s, %s, %s);
-                ''', (time, title, type, day, stream))
-
-    disconnect(connection, cursor)
+            INSERT INTO day_info(lesson_time, lesson_title, lesson_type, day, stream)
+                    VALUES(%s, %s, %s, %s, %s);
+            ''', (
+                time, title, type, day, stream,
+            ))
 
 
 def main():
     connection, cursor = connect_to_db()
     cursor.execute('TRUNCATE TABLE day_info;')
-    disconnect(connection, cursor)
 
     with open('streams_info.json', 'r') as db:
         streams = json.load(db)
@@ -47,7 +45,9 @@ def main():
     all_classes = streams.keys()
     for key_i, key in enumerate(all_classes):
         stream = streams.get(key)
-        database_update(parse_timetable(stream), stream)
+        database_update(parse_timetable(stream), stream, connection, cursor)
+
+    disconnect(connection, cursor)
 
 
 if __name__ == '__main__':
