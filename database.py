@@ -21,17 +21,17 @@ def disconnect(connection, cursor):
     connection.close()
 
 
-def database_update(data, stream, connection, cursor):
+def database_update(data, stream, cursor):
     for day in data.keys():
         info = data.get(day)
         for i in range(len(info[0])):
-            time, title, type = info[0][i], info[1][i], info[2][i]
+            time, title, _type = info[0][i], info[1][i], info[2][i]
 
             cursor.execute('''
             INSERT INTO day_info(lesson_time, lesson_title, lesson_type, day, stream)
                     VALUES(%s, %s, %s, %s, %s);
             ''', (
-                time, title, type, day, stream,
+                time, title, _type, day, stream,
             ))
 
 
@@ -45,7 +45,7 @@ def main():
     all_classes = streams.keys()
     for key_i, key in enumerate(all_classes):
         stream = streams.get(key)
-        database_update(parse_timetable(stream), stream, connection, cursor)
+        database_update(parse_timetable(stream), stream, cursor)
 
     disconnect(connection, cursor)
 

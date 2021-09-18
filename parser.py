@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 def check_if_time(element):
     element = element.strip()
     for letter in element:
-        if letter.isdigit(): return True
+        if letter.isdigit():
+            return True
     return False
 
 
@@ -34,8 +35,10 @@ def parse_timetable(stream):
 
         for row in day.find_all('li', {'class': 'common-list-item row'}):
             for item in row.find_all('span'):
-                if str(item).count('cancelled') == 0 and str(item).count('moreinfo') != 0 \
-                        and str(item).count('hoverable') == 0:
+                item_str = str(item)
+                trash = sum(item_str.count(x) for x in ('cancelled', 'hoverable'))
+                lesson_row = item_str.count('moreinfo')
+                if not trash and lesson_row:
 
                     if check_if_time(item.text):  # время урока
                         time = ''.join(item.text.split())

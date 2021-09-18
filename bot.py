@@ -48,22 +48,20 @@ def get_all_info_day(cursor, day, stream):
     (position(%s IN day_info.day) > 0 AND day_info.stream=%s)
     ''', (day, stream,))
 
-    time, title, _day, type = [], [], [], []
+    time, title, _day, _type = [], [], [], []
     info = cursor.fetchall()
 
     for i in range(len(info)):
         time.append(info[i][0])
         title.append(info[i][1])
-        type.append(info[i][2])
+        _type.append(info[i][2])
         _day.append(info[i][3])
     # в каждый массив записываются соответствующее столбцы
 
-    return time, title, _day, type
+    return time, title, _day, _type
 
 
 def prepare_answer(info, date):
-    #
-
     # возвращает сообщение для одного дня строкой
     # Вторник, 1 сентября
     # 10:00-14:00 Алгебра
@@ -86,7 +84,7 @@ def prepare_answer(info, date):
 
 
 def main():
-    bot = telebot.TeleBot(config.token)
+    bot = telebot.AsyncTeleBot(config.token)
 
     keyboard = config.main_keyboard
     # заранее созданная клавиатура
@@ -139,10 +137,7 @@ def main():
 
             SELECT c2 FROM user_info WHERE c1=%s;
             ''', (
-                user_id,
-                date,
-                date,
-                user_id,
+                user_id, date, date, user_id,
             ))
             user_stream = cursor.fetchall()[0][0]
 
