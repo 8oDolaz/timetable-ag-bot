@@ -84,7 +84,7 @@ def prepare_answer(info, date):
 
 
 def main():
-    bot = telebot.AsyncTeleBot(config.token)
+    bot = telebot.TeleBot(config.token)
 
     keyboard = config.main_keyboard
     # заранее созданная клавиатура
