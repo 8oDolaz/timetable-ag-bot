@@ -6,42 +6,46 @@ import config
 import datetime
 
 
-# Таблицы в базе данных
+# Tables in database
 
-# таблица day_info
-# lesson_time, lesson_title, lesson_type, day,                stream
-# 10:00–14:00, Алгебра,      Очно,        четверг, 2 сентября 303263
+# day_info table:
+# lesson_time,          lesson_title,        lesson_type,    day,                            stream
+# 10:00–14:00::string,  Алгебра::string,     Очно::string,   четверг, 2 сентября::string     303263::int
 
-# таблица user_info
-# c1, c2
-# c1 -- id пользователя в телеграм, c2 -- класс пользователя
+# user_info table:
+# c1 (id в telegram),   c2 (поток пользователя)
+# 1218805540::int,      303263::int
+
+# latest_message table:
+# telegram_id,      message_date
+# 1218805540::int   2021-09-14 15:20:18.000000::timestamp
 
 
 def get_date(date):
-    # date -- datetime.datetime.now()
+    # Args:
+    #   date -- datetime.datetime.now()
 
-    # возвращает дату в формате "вторник, 1", "среда, 2" и т.д.
-    # получаем индекс дня в неделе, потом этот индекс используем в массиве с названием дней недели
-    # получаем дату (день) и берем
+    # Returns:
+    #   string = 'вторник, 1'; 'среда, 2' etc.
 
-    # номер дня в неделе
+    # получаем индекс дня недели
+    # создаем строку с датой (день)
+    # возвращаем день недели по индексу с датой
+
     day_in_week = date.isoweekday() - 1
-    # дата (день)
     date = date.strftime('%d')
-    # убираем первый ноль, если он есть
     date = date[1:] if date[0] == '0' else date
-    # получаем название дня, которое находится под индексом day_in_week
     return config.days[day_in_week] + ', ' + date
 
 
 def get_all_info_day(cursor, day, stream):
-    # cursor -- подключение к базе данных
-    # day -- "вторник, 1" строка
-    # stream -- значение по ключу (streams_info.json) число
+    # Args:
+    #   cursor -- объект psycopg2, подключение к базе данных
+    #   day -- "вторник, 1", string
+    #   stream -- streams_info.json[stream], int
 
-    # возвращает 4 массива: время урока, название предмета, дата, тип занятия (соответственно)
-    # тип урока в боте не отображается, т.к. в расписании это не соответствует реальности,
-    # но возможность не была убрана
+    # Returns:
+    #   4 list: время урока, название предмета, дата, тип занятия
 
     cursor.execute('''
     SELECT * FROM day_info WHERE
@@ -56,16 +60,19 @@ def get_all_info_day(cursor, day, stream):
         title.append(info[i][1])
         _type.append(info[i][2])
         _day.append(info[i][3])
-    # в каждый массив записываются соответствующее столбцы
 
     return time, title, _day, _type
 
 
 def prepare_answer(info, date):
-    # возвращает сообщение для одного дня строкой
-    # Вторник, 1 сентября
-    # 10:00-14:00 Алгебра
-    # ...
+    # Args:
+    #   info -- 4 list, get_all_info_day()
+
+    # Returns:
+    #   string --
+    #   Вторник, 1 сентября
+    #   10:00-14:00 Алгебра
+    #   ...
 
     date_str = get_date(date).strip().capitalize()
     if len(info[2]) != 0:
@@ -84,41 +91,36 @@ def prepare_answer(info, date):
 
 
 def main():
+    # Постоянно встречающийся параметр:
+    #   message -- telegram response
+    #   https://github.com/eternnoir/pyTelegramBotAPI#callback-query-handler
+
     bot = telebot.TeleBot(config.token)
 
     keyboard = config.main_keyboard
-    # заранее созданная клавиатура
 
     @bot.message_handler(func=lambda message: True, commands=['start'])
-    # стартовая команда бота
     def start(message):
-        # здесь, как и в дальнейшем,
-        # message -- объект, который содержит всю информацию о сообщении и чате
-
         connection, cursor = connect_to_db()
-        # подключение к базе данных
 
         cursor.execute('SELECT USER_INFO FROM USER_INFO WHERE c1=%s;', (message.chat.id,))
         if len(cursor.fetchall()) == 0:
-            # пользователь не указывал класс
+            # пользователь еще не записан в базе данных
             bot.send_message(message.chat.id, config.instruction)
         else:
-            # такой пользователь уже указывал класс
+            # пользователь уже есть в базе данных
             bot.send_message(message.chat.id,
                              'Мы уже занем ваш класс (чтобы сменить его нажмите на кнопку)',
                              reply_markup=keyboard)
 
         disconnect(connection, cursor)
-        # отключение от базы данных. все время быть подлюченным нельзя, т.к. соединение рвется
 
     @bot.message_handler(func=lambda message: True, commands=['info'])
-    # информация о боте
     def info(message):
         bot.send_message(message.chat.id,
                          config.info)
 
-    # основная функция бота, показывающая расписание
-    @bot.message_handler(func=lambda message: True, content_types=['text'])  # все наши команды выводят текст
+    @bot.message_handler(func=lambda message: True, content_types=['text'])
     def main_bot(message):
         user_id = message.chat.id
 
@@ -126,7 +128,7 @@ def main():
         cursor.execute('SELECT USER_INFO FROM USER_INFO WHERE c1=%s;', (user_id,))
 
         if len(cursor.fetchall()) != 0:
-            # такой пользователь уже существует
+            # пользователь есть в базе данных
             date = datetime.datetime.now()
             date = date.strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute('''
@@ -156,7 +158,6 @@ def main():
                                      reply_markup=keyboard)
 
                 elif message.text.lower() == 'завтра':
-
                     date = date + datetime.timedelta(days=1)
                     date_for_db = get_date(date)
 
@@ -192,6 +193,7 @@ def main():
                                  'Пожалуйста, выберете одну из опций',
                                  reply_markup=keyboard)
         else:
+            # пользователя нет в базе данных
             with open('streams_info.json', 'r') as file:
                 stream = message.text.lower()
                 if not stream[-1].isdigit():
@@ -201,6 +203,7 @@ def main():
                 file.close()
 
             if stream is not None:
+                # указанный поток существует
                 cursor.execute('INSERT INTO USER_INFO(c1, c2) VALUES(%s, %s);',
                                (user_id, stream,))
 
@@ -208,6 +211,7 @@ def main():
                                  config.text_after_change,
                                  reply_markup=keyboard)
             else:
+                # указанного потока не существует
                 bot.send_message(user_id,
                                  config.instruction)
 
