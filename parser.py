@@ -19,7 +19,11 @@ def parse_timetable(stream):
     # website link for actual day
     url_lessons = f'https://timetable.spbu.ru/AGSM/StudentGroupEvents/Primary/%s/%s' % (stream, now)
     # send a get request
-    request = requests.get(url_lessons, headers={'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'})
+    request = requests.get(
+        url_lessons,
+        headers={'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'},
+        verify=False
+    )
 
     soup = BeautifulSoup(request.text, features='lxml')  # init Beautiful soup
     # all info except first and second (some useless info in it)
