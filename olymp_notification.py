@@ -4,10 +4,10 @@ import requests
 import bs4
 import telebot
 
-bot = telebot.TeleBot(config.token_test)
-
 
 def schedule():
+    bot = telebot.TeleBot(config.token_test)
+
     req = requests.get(
         'https://olimpiada.ru/activities?type=ind&subject%5B7%5D=on&class=11&period_date=&period=year'
     )
@@ -25,4 +25,5 @@ def schedule():
                 bot.send_message(862932540, olymp_date)
 
 
-schedule()
+if __name__ == '__main__':
+    schedule()
