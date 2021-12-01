@@ -82,6 +82,11 @@ def prepare_answer(info, date):
 
         ans = day + '\n'
         for item in range(len(time)):
+            lesson_hour = int(time[item][:2])
+
+            if lesson_hour == 17:
+                ans += '17.05 Турнир по Brawl Stars\n'
+
             ans += time[item].strip() + ' ' + title[item].strip() + '\n'
     else:
         ans = date_str + ' ' + config.months[date.month - 1] + '\n'
