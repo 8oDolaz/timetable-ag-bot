@@ -1,7 +1,7 @@
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
-token_test = '1483091692:AAF8LHuy-vk7DnELz8GI3U-CJVEtjNh6qa0'  # тестовый бот
-token = '1382842329:AAGm6ydcY0mybVfkLxwH7q0rAkqF9S7hh8M'  # основной бот
+token_test = 'your-token'  # тестовый бот
+token = 'your-token'  # основной бот
 
 main_keyboard = ReplyKeyboardMarkup()  # создаем клавиатуру
 main_keyboard.row(
