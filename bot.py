@@ -75,7 +75,6 @@ def prepare_answer(info, date):
     #   ...
 
     date_str = get_date(date).strip().capitalize()
-    sosi = False
     if len(info[2]) != 0:
         day = info[2][0].strip().capitalize()
         time = info[0]
@@ -84,18 +83,8 @@ def prepare_answer(info, date):
         ans = day + '\n'
         for item in range(len(time)):
 
-            lesson_hour = int(time[item][:2])
-
-            print(lesson_hour, day.count('2'), not sosi)
-            if (lesson_hour == 17) and (day.count('2') != 0) and not sosi:
-                print(1)
-                sosi = True
-                ans += '17.05 Турнир по Brawl Stars\n'
-
             ans += time[item].strip() + ' ' + title[item].strip() + '\n'
 
-        if not sosi and (day.count('2') != 0):
-            ans += '17.05 Турнир по Brawl Stars'
     else:
         ans = date_str + ' ' + config.months[date.month - 1] + '\n'
         ans += 'Уроков нет!'
